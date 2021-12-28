@@ -63,11 +63,27 @@ Card Deck_next(Deck *this)
     return Card_from_id(id);
 }
 
-void deal_player(Deck *deck, const char *name)
+typedef struct {
+    const char *name;
+    Card cards[2];
+} Hand;
+
+Hand Hand_deal(const char *name, Deck *deck)
 {
-    Card hand[] = {Deck_next(deck), Deck_next(deck)};
-    printf("%s:\n", name);
-    printf("\t%s %s\n", hand[0].text, hand[1].text);
+    Hand result = {
+        .name = name,
+        .cards = {
+            Deck_next(deck),
+            Deck_next(deck),
+        },
+    };
+    return result;
+}
+
+void Hand_show(Hand *hand)
+{
+    printf("%s:\n", hand->name);
+    printf("\t%s %s\n", hand->cards[0].text, hand->cards[1].text);
 }
 
 void deal_board(Deck *deck)
@@ -99,7 +115,8 @@ int main(void)
 {
     Deck *deck = Deck_new();
     Deck_shuffle(deck);
-    deal_player(deck, "Hero");
+    Hand hero = Hand_deal("Hero", deck);
+    Hand_show(&hero);
     deal_board(deck);
     Deck_cleanup(deck);
 }
