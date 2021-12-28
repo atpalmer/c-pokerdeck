@@ -86,29 +86,90 @@ void Hand_show(Hand *hand)
     printf("\t%s %s\n", hand->cards[0].text, hand->cards[1].text);
 }
 
-void deal_board(Deck *deck)
+typedef enum {
+    BOARD_EMPTY = 0,
+    BOARD_FLOP = 1,
+    BOARD_TURN = 2,
+    BOARD_RIVER = 3,
+} BoardState;
+
+typedef struct {
+    BoardState state;
+    Card cards[5];
+} Board;
+
+Board Board_new(void)
 {
-    Card flop[] = {
-        Deck_next(deck),
-        Deck_next(deck),
-        Deck_next(deck),
+    Board result = {
+        .state = BOARD_EMPTY,
+        .cards = {0},
     };
+    return result;
+}
+
+/**
+ * Returns num cards dealt (0 or 3)
+ */
+int Board_flop(Board *this, Deck *deck)
+{
+    if (this->state != BOARD_EMPTY)
+        return 0;
+    this->cards[0] = Deck_next(deck);
+    this->cards[1] = Deck_next(deck);
+    this->cards[2] = Deck_next(deck);
+    this->state = BOARD_FLOP;
+    return 3;
+}
+
+int Board_turn(Board *this, Deck *deck)
+{
+    if (this->state != BOARD_FLOP)
+        return 0;
+    this->cards[3] = Deck_next(deck);
+    this->state = BOARD_TURN;
+    return 1;
+}
+
+int Board_river(Board *this, Deck *deck)
+{
+    if (this->state != BOARD_TURN)
+        return 0;
+    this->cards[4] = Deck_next(deck);
+    this->state = BOARD_RIVER;
+    return 1;
+}
+
+void deal_board(Board *board, Deck *deck)
+{
+    if (!Board_flop(board, deck))
+        return;
 
     printf("Flop:\n");
     printf("\t%s %s %s\n",
-        flop[0].text, flop[1].text, flop[2].text);
+        board->cards[0].text,
+        board->cards[1].text,
+        board->cards[2].text);
 
-    Card turn = Deck_next(deck);
+    if (!Board_turn(board, deck))
+        return;
 
     printf("Turn:\n");
     printf("\t%s %s %s %s\n",
-        flop[0].text, flop[1].text, flop[2].text, turn.text);
+        board->cards[0].text,
+        board->cards[1].text,
+        board->cards[2].text,
+        board->cards[3].text);
 
-    Card river = Deck_next(deck);
+    if (!Board_river(board, deck))
+        return;
 
     printf("River:\n");
     printf("\t%s %s %s %s %s\n",
-        flop[0].text, flop[1].text, flop[2].text, turn.text, river.text);
+        board->cards[0].text,
+        board->cards[1].text,
+        board->cards[2].text,
+        board->cards[3].text,
+        board->cards[4].text);
 }
 
 int main(void)
@@ -116,7 +177,8 @@ int main(void)
     Deck *deck = Deck_new();
     Deck_shuffle(deck);
     Hand hero = Hand_deal("Hero", deck);
+    Board board = Board_new();
     Hand_show(&hero);
-    deal_board(deck);
+    deal_board(&board, deck);
     Deck_cleanup(deck);
 }
