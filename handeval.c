@@ -32,41 +32,21 @@ static int _flush(EvalState *state)
 
 static void _count_ranks(EvalState *state)
 {
-    int rankc[13] = {0};
     for (int i = 0; i < state->cardlen; ++i) {
         int rankx = RANKX(state->cards[i]);
-        ++rankc[rankx];
+        ++state->rankc[rankx];
     }
 
     printf("Rank counts:\n");
     for (int i = 0; i < 13; ++i) {
-        if (!rankc[i])
+        if (!state->rankc[i])
             continue;
-        printf("\t%c: %d\n", RankSym[i], rankc[i]);
+        printf("\t%c: %d\n", RankSym[i], state->rankc[i]);
     }
 }
 
-void evaluate(Hand *hand, Board *board)
+static void _of_a_kind(EvalState *state)
 {
-    EvalState state = {
-        .cardlen = ARRAYLEN(state.cards),
-        .cards = {
-            hand->cards[0].id,
-            hand->cards[1].id,
-            board->cards[0].id,
-            board->cards[1].id,
-            board->cards[2].id,
-            board->cards[3].id,
-            board->cards[4].id,
-        },
-        .suitc = {0, 0, 0, 0},
-        .rankc = {0},
-    };
-
-    _flush(&state);
-
-    _count_ranks(&state);
-
     enum {
         KIND_NONE = 0,
         KIND_PAIR = 1,
@@ -78,7 +58,7 @@ void evaluate(Hand *hand, Board *board)
 
     uint8_t ofakind = 0;
     for (int i = 0; i < 13; ++i) {
-        switch (state.rankc[i]) {
+        switch (state->rankc[i]) {
         case 2:
             ofakind |= ((ofakind & KIND_PAIR) == KIND_PAIR) ? KIND_2PAIR : KIND_PAIR;
             break;
@@ -106,6 +86,30 @@ void evaluate(Hand *hand, Board *board)
         char sym = ((kind_order[i].kind & ofakind) == kind_order[i].kind) ? 'Y' : 'N';
         printf("%s: %c\n", kind_order[i].text, sym);
     }
+}
+
+void evaluate(Hand *hand, Board *board)
+{
+    EvalState state = {
+        .cardlen = ARRAYLEN(state.cards),
+        .cards = {
+            hand->cards[0].id,
+            hand->cards[1].id,
+            board->cards[0].id,
+            board->cards[1].id,
+            board->cards[2].id,
+            board->cards[3].id,
+            board->cards[4].id,
+        },
+        .suitc = {0, 0, 0, 0},
+        .rankc = {0},
+    };
+
+    _flush(&state);
+
+    _count_ranks(&state);
+
+    _of_a_kind(&state);
 
     int straightc = state.rankc[RANK_A] ? 1 : 0;
     printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, state.rankc[RANK_A]);
