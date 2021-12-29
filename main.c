@@ -11,6 +11,10 @@ static const char SuitSym[] = "shdc";
 #define RANK(c) (RankSym[RANKX(c)])
 #define SUIT(c) (SuitSym[SUITX(c)])
 
+enum {
+    RANK_A = 12,
+};
+
 typedef struct {
     int id;
     char text[3];  /* '\0'-terminated string */
@@ -172,6 +176,60 @@ void deal_board(Board *board, Deck *deck)
         board->cards[4].text);
 }
 
+void evaluate(Hand *hand, Board *board)
+{
+    static const int CARDLEN = 7;
+
+    int cards[] = {
+        hand->cards[0].id,
+        hand->cards[1].id,
+        board->cards[0].id,
+        board->cards[1].id,
+        board->cards[2].id,
+        board->cards[3].id,
+        board->cards[4].id,
+    };
+
+    for (int i = 0; i < CARDLEN - 1; ++i) {
+        if (RANKX(cards[i]) == 1)
+            continue;
+        int lowx = i;
+        for (int j = i + 1; j < CARDLEN; ++j) {
+            if (RANKX(cards[j]) < RANKX(cards[lowx]))
+                lowx = j;
+        }
+        if (lowx == i)
+            continue;
+        int tmp = cards[i];
+        cards[i] = cards[lowx];
+        cards[lowx] = tmp;
+    }
+
+    printf("Sorted Cards:\n\t");
+    for (int x = 0; x < CARDLEN; ++x) {
+        printf("%s ", Card_from_id(cards[x]).text);
+    }
+    printf("\n");
+
+    int last_rank = (RANKX(cards[CARDLEN - 1]) == RANK_A) ? -1 : RANKX(cards[CARDLEN - 1]);
+    int longest_straight = 1;
+    int current_straight = 1;
+    for (int i = 0; i < CARDLEN; ++i) {
+        int rank = RANKX(cards[i]);
+        if (rank == last_rank)
+            continue;
+        if (rank == last_rank + 1)
+            ++current_straight;
+            if (current_straight > longest_straight)
+                longest_straight = current_straight;
+        else
+            current_straight = 1;
+        last_rank = rank;
+    }
+
+    printf("Longest straight: %d\n", longest_straight);
+}
+
 int main(void)
 {
     Deck *deck = Deck_new();
@@ -180,5 +238,6 @@ int main(void)
     Board board = Board_new();
     Hand_show(&hero);
     deal_board(&board, deck);
+    evaluate(&hero, &board);
     Deck_cleanup(deck);
 }
