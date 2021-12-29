@@ -228,6 +228,18 @@ void evaluate(Hand *hand, Board *board)
     }
 
     printf("Longest straight: %d\n", longest_straight);
+
+    int suitc[4] = {0};
+    for (int i = 0; i < CARDLEN; ++i) {
+        int suitx = SUITX(cards[i]);
+        ++suitc[suitx];
+    }
+
+    printf("Suit counts:\n");
+    for (int i = 0; i < 4; ++i) {
+        char flushsym = (suitc[i] >= 5) ? '*' : ' ';
+        printf("\t%c%c: %d\n", flushsym, SuitSym[i], suitc[i]);
+    }
 }
 
 int main(void)
