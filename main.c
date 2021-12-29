@@ -215,6 +215,46 @@ void evaluate(Hand *hand, Board *board)
         printf("\t%c: %d\n", RankSym[i], rankc[i]);
     }
 
+    enum {
+        KIND_NONE = 0,
+        KIND_PAIR = 1,
+        KIND_2PAIR = 2 | KIND_PAIR,
+        KIND_TRIPS = 4,
+        KIND_QUADS = 8,
+        KIND_FH = KIND_PAIR | KIND_TRIPS,
+    };
+
+    uint8_t ofakind = 0;
+    for (int i = 0; i < 13; ++i) {
+        switch (rankc[i]) {
+        case 2:
+            ofakind |= ((ofakind & KIND_PAIR) == KIND_PAIR) ? KIND_2PAIR : KIND_PAIR;
+            break;
+        case 3:
+            ofakind |= KIND_TRIPS;
+            break;
+        case 4:
+            ofakind |= KIND_QUADS;
+            break;
+        default:
+            break;
+        };
+    }
+
+    struct {uint8_t kind; const char *text;} kind_order[] = {
+        {KIND_QUADS, "Quads"},
+        {KIND_FH, "Full House"},
+        {KIND_TRIPS, "Trips"},
+        {KIND_2PAIR, "Two Pair"},
+        {KIND_PAIR, "Pair"},
+        {KIND_NONE, NULL},
+    };
+
+    for (int i = 0; i < 5; ++i) {
+        char sym = ((kind_order[i].kind & ofakind) == kind_order[i].kind) ? 'Y' : 'N';
+        printf("%s: %c\n", kind_order[i].text, sym);
+    }
+
     int straightc = rankc[RANK_A] ? 1 : 0;
     printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, rankc[RANK_A]);
     for (int i = 0; i < 13; ++i) {
