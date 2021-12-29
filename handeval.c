@@ -2,9 +2,32 @@
 #include <stdlib.h>
 #include "pokerdeck.h"
 
+static const int CARDLEN = 7;
+
+static int _flush(int cards[])
+{
+    int suitc[4] = {0};
+    for (int i = 0; i < CARDLEN; ++i) {
+        int suitx = SUITX(cards[i]);
+        ++suitc[suitx];
+    }
+
+    printf("Suit counts:\n");
+    for (int i = 0; i < ARRAYLEN(suitc); ++i) {
+        char flushsym = (suitc[i] >= 5) ? '*' : ' ';
+        printf("\t%c%c: %d\n", flushsym, SuitSym[i], suitc[i]);
+    }
+
+    for (int i = 0; i < ARRAYLEN(suitc); ++i) {
+        if (suitc[i] >= 5)
+            return 1;
+    }
+
+    return 0;
+}
+
 void evaluate(Hand *hand, Board *board)
 {
-    static const int CARDLEN = 7;
 
     int cards[] = {
         hand->cards[0].id,
@@ -16,17 +39,7 @@ void evaluate(Hand *hand, Board *board)
         board->cards[4].id,
     };
 
-    int suitc[4] = {0};
-    for (int i = 0; i < CARDLEN; ++i) {
-        int suitx = SUITX(cards[i]);
-        ++suitc[suitx];
-    }
-
-    printf("Suit counts:\n");
-    for (int i = 0; i < 4; ++i) {
-        char flushsym = (suitc[i] >= 5) ? '*' : ' ';
-        printf("\t%c%c: %d\n", flushsym, SuitSym[i], suitc[i]);
-    }
+    _flush(cards);
 
     int rankc[13] = {0};
     for (int i = 0; i < CARDLEN; ++i) {
