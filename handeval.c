@@ -2,48 +2,39 @@
 #include <stdlib.h>
 #include "pokerdeck.h"
 
-static const int CARDLEN = 7;
+typedef struct {
+    int cardlen;
+    int cards[7];
+    int suitc[4];
+    int rankc[13];
+} EvalState;
 
-static int _flush(int cards[])
+static int _flush(EvalState *state)
 {
-    int suitc[4] = {0};
-    for (int i = 0; i < CARDLEN; ++i) {
-        int suitx = SUITX(cards[i]);
-        ++suitc[suitx];
+    for (int i = 0; i < state->cardlen; ++i) {
+        int suitx = SUITX(state->cards[i]);
+        ++state->suitc[suitx];
     }
 
     printf("Suit counts:\n");
-    for (int i = 0; i < ARRAYLEN(suitc); ++i) {
-        char flushsym = (suitc[i] >= 5) ? '*' : ' ';
-        printf("\t%c%c: %d\n", flushsym, SuitSym[i], suitc[i]);
+    for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
+        char flushsym = (state->suitc[i] >= 5) ? '*' : ' ';
+        printf("\t%c%c: %d\n", flushsym, SuitSym[i], state->suitc[i]);
     }
 
-    for (int i = 0; i < ARRAYLEN(suitc); ++i) {
-        if (suitc[i] >= 5)
+    for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
+        if (state->suitc[i] >= 5)
             return 1;
     }
 
     return 0;
 }
 
-void evaluate(Hand *hand, Board *board)
+static void _count_ranks(EvalState *state)
 {
-
-    int cards[] = {
-        hand->cards[0].id,
-        hand->cards[1].id,
-        board->cards[0].id,
-        board->cards[1].id,
-        board->cards[2].id,
-        board->cards[3].id,
-        board->cards[4].id,
-    };
-
-    _flush(cards);
-
     int rankc[13] = {0};
-    for (int i = 0; i < CARDLEN; ++i) {
-        int rankx = RANKX(cards[i]);
+    for (int i = 0; i < state->cardlen; ++i) {
+        int rankx = RANKX(state->cards[i]);
         ++rankc[rankx];
     }
 
@@ -53,6 +44,28 @@ void evaluate(Hand *hand, Board *board)
             continue;
         printf("\t%c: %d\n", RankSym[i], rankc[i]);
     }
+}
+
+void evaluate(Hand *hand, Board *board)
+{
+    EvalState state = {
+        .cardlen = ARRAYLEN(state.cards),
+        .cards = {
+            hand->cards[0].id,
+            hand->cards[1].id,
+            board->cards[0].id,
+            board->cards[1].id,
+            board->cards[2].id,
+            board->cards[3].id,
+            board->cards[4].id,
+        },
+        .suitc = {0, 0, 0, 0},
+        .rankc = {0},
+    };
+
+    _flush(&state);
+
+    _count_ranks(&state);
 
     enum {
         KIND_NONE = 0,
@@ -65,7 +78,7 @@ void evaluate(Hand *hand, Board *board)
 
     uint8_t ofakind = 0;
     for (int i = 0; i < 13; ++i) {
-        switch (rankc[i]) {
+        switch (state.rankc[i]) {
         case 2:
             ofakind |= ((ofakind & KIND_PAIR) == KIND_PAIR) ? KIND_2PAIR : KIND_PAIR;
             break;
@@ -94,17 +107,17 @@ void evaluate(Hand *hand, Board *board)
         printf("%s: %c\n", kind_order[i].text, sym);
     }
 
-    int straightc = rankc[RANK_A] ? 1 : 0;
-    printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, rankc[RANK_A]);
+    int straightc = state.rankc[RANK_A] ? 1 : 0;
+    printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, state.rankc[RANK_A]);
     for (int i = 0; i < 13; ++i) {
-        if (rankc[i]) {
+        if (state.rankc[i]) {
             ++straightc;
             if (straightc == 5)
                 break;
         }
         else
             straightc = 0;
-        printf("* straightc [%c]: %d (%d)\n", RankSym[i], straightc, rankc[i]);
+        printf("* straightc [%c]: %d (%d)\n", RankSym[i], straightc, state.rankc[i]);
     }
     printf("Has straight: %c\n", straightc == 5 ? 'Y' : 'N');
 }
