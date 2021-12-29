@@ -240,6 +240,19 @@ void evaluate(Hand *hand, Board *board)
         char flushsym = (suitc[i] >= 5) ? '*' : ' ';
         printf("\t%c%c: %d\n", flushsym, SuitSym[i], suitc[i]);
     }
+
+    int rankc[13] = {0};
+    for (int i = 0; i < CARDLEN; ++i) {
+        int rankx = RANKX(cards[i]);
+        ++rankc[rankx];
+    }
+
+    printf("Rank counts:\n");
+    for (int i = 0; i < 13; ++i) {
+        if (!rankc[i])
+            continue;
+        printf("\t%c: %d\n", RankSym[i], rankc[i]);
+    }
 }
 
 int main(void)
