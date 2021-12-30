@@ -2,6 +2,42 @@
 #include <stdlib.h>
 #include "pokerdeck.h"
 
+/*
+ * Hand evaluation format encodes leading hand qualification,
+ * followed by ordered card ranks (4 bits x 5 cards).
+ */
+typedef uint32_t HandEval;
+
+enum {
+    EVAL_NONE       = 0,
+    EVAL_PAIR       = 0x00100000,
+    EVAL_TWOPAIR    = 0x00200000,
+    EVAL_TRIPS      = 0x00300000,
+    EVAL_STRAIGHT   = 0x00400000,
+    EVAL_FLUSH      = 0x00500000,
+    EVAL_BOAT       = 0x00600000,
+    EVAL_QUADS      = 0x00700000,
+    EVAL_STFLUSH    = 0x00800000,
+    EVAL_ROYAL      = 0x00900000,
+};
+
+#define EVALX(e)    ((e) >> (4 * 5))
+
+static const char *_EVAL_TEXT[] = {
+    [EVALX(EVAL_NONE)]     = "High card",
+    [EVALX(EVAL_PAIR)]     = "Pair",
+    [EVALX(EVAL_TWOPAIR)]  = "Two Pair",
+    [EVALX(EVAL_TRIPS)]    = "Three of a Kind",
+    [EVALX(EVAL_STRAIGHT)] = "Straight",
+    [EVALX(EVAL_FLUSH)]    = "Flush",
+    [EVALX(EVAL_BOAT)]     = "Full House",
+    [EVALX(EVAL_QUADS)]    = "Four of a Kind",
+    [EVALX(EVAL_STFLUSH)]  = "Straight Flush",
+    [EVALX(EVAL_ROYAL)]    = "Royal Flush",
+};
+
+#define EVAL_TEXT(e)    (_EVAL_TEXT[EVALX(e)])
+
 typedef struct {
     int cardlen;
     int cards[7];
@@ -38,17 +74,17 @@ static void _count_ranks(EvalState *state)
     }
 }
 
-static int _flush(EvalState *state)
+static HandEval _flush(EvalState *state)
 {
     for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
         if (state->suitc[i] >= 5)
-            return 1;
+            return EVAL_FLUSH;
     }
 
-    return 0;
+    return EVAL_NONE;
 }
 
-static void _of_a_kind(EvalState *state)
+static HandEval _of_a_kind(EvalState *state)
 {
     enum {
         KIND_NONE = 0,
@@ -76,22 +112,27 @@ static void _of_a_kind(EvalState *state)
         };
     }
 
-    struct {uint8_t kind; const char *text;} kind_order[] = {
-        {KIND_QUADS, "Quads"},
-        {KIND_FH, "Full House"},
-        {KIND_TRIPS, "Trips"},
-        {KIND_2PAIR, "Two Pair"},
-        {KIND_PAIR, "Pair"},
-        {KIND_NONE, NULL},
+    static const struct {uint8_t kind; const char *text; HandEval eval;} kind_order[] = {
+        {KIND_QUADS, "Quads", EVAL_QUADS},
+        {KIND_FH, "Full House", EVAL_BOAT},
+        {KIND_TRIPS, "Trips", EVAL_TRIPS},
+        {KIND_2PAIR, "Two Pair", EVAL_TWOPAIR},
+        {KIND_PAIR, "Pair", EVAL_PAIR},
+        {KIND_NONE, NULL, EVAL_NONE},
     };
 
     for (int i = 0; i < 5; ++i) {
-        char sym = ((kind_order[i].kind & ofakind) == kind_order[i].kind) ? 'Y' : 'N';
+        char sym = (HAS_FLAG(ofakind, kind_order[i].kind)) ? 'Y' : 'N';
         printf("%s: %c\n", kind_order[i].text, sym);
+
+        if (HAS_FLAG(ofakind, kind_order[i].kind))
+            return kind_order[i].eval;
     }
+
+    return EVAL_NONE;
 }
 
-static void _straight(EvalState *state)
+static HandEval _straight(EvalState *state)
 {
     int straightc = state->rankc[RANK_A] ? 1 : 0;
     printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, state->rankc[RANK_A]);
@@ -106,6 +147,13 @@ static void _straight(EvalState *state)
         printf("* straightc [%c]: %d (%d)\n", RankSym[i], straightc, state->rankc[i]);
     }
     printf("Has straight: %c\n", straightc == 5 ? 'Y' : 'N');
+    return straightc == 5 ? EVAL_STRAIGHT : EVAL_NONE;
+}
+
+static void _display(HandEval eval, const char *trying)
+{
+    printf("Trying %s:\n", trying);
+    printf("* Result: %s\n", (eval) ? EVAL_TEXT(eval) : "None");
 }
 
 void evaluate(Hand *hand, Board *board)
@@ -125,10 +173,11 @@ void evaluate(Hand *hand, Board *board)
         .rankc = {0},
     };
 
+
     _count_suits(&state);
     _count_ranks(&state);
 
-    _flush(&state);
-    _of_a_kind(&state);
-    _straight(&state);
+    _display(_flush(&state), "Flush");
+    _display(_of_a_kind(&state), "Of A Kind");
+    _display(_straight(&state), "Straight");
 }

@@ -1,7 +1,8 @@
 #ifndef POKERDECK_H
 #define POKERDECK_H
 
-#define ARRAYLEN(x) ((ssize_t)(sizeof (x)  / sizeof *(x)))
+#define ARRAYLEN(x)         ((ssize_t)(sizeof (x)  / sizeof *(x)))
+#define HAS_FLAG(x, flag)   (((x) & (flag)) == (flag))
 
 static const char RankSym[] = "23456789TJQKA";
 static const char SuitSym[] = "shdc";
