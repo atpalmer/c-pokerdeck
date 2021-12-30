@@ -9,7 +9,7 @@ typedef struct {
     int rankc[13];
 } EvalState;
 
-static int _flush(EvalState *state)
+static void _count_suits(EvalState *state)
 {
     for (int i = 0; i < state->cardlen; ++i) {
         int suitx = SUITX(state->cards[i]);
@@ -21,13 +21,6 @@ static int _flush(EvalState *state)
         char flushsym = (state->suitc[i] >= 5) ? '*' : ' ';
         printf("\t%c%c: %d\n", flushsym, SuitSym[i], state->suitc[i]);
     }
-
-    for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
-        if (state->suitc[i] >= 5)
-            return 1;
-    }
-
-    return 0;
 }
 
 static void _count_ranks(EvalState *state)
@@ -43,6 +36,16 @@ static void _count_ranks(EvalState *state)
             continue;
         printf("\t%c: %d\n", RankSym[i], state->rankc[i]);
     }
+}
+
+static int _flush(EvalState *state)
+{
+    for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
+        if (state->suitc[i] >= 5)
+            return 1;
+    }
+
+    return 0;
 }
 
 static void _of_a_kind(EvalState *state)
@@ -122,11 +125,10 @@ void evaluate(Hand *hand, Board *board)
         .rankc = {0},
     };
 
-    _flush(&state);
-
+    _count_suits(&state);
     _count_ranks(&state);
 
+    _flush(&state);
     _of_a_kind(&state);
-
     _straight(&state);
 }
