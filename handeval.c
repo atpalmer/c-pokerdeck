@@ -88,6 +88,23 @@ static void _of_a_kind(EvalState *state)
     }
 }
 
+static void _straight(EvalState *state)
+{
+    int straightc = state->rankc[RANK_A] ? 1 : 0;
+    printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, state->rankc[RANK_A]);
+    for (int i = 0; i < 13; ++i) {
+        if (state->rankc[i]) {
+            ++straightc;
+            if (straightc == 5)
+                break;
+        }
+        else
+            straightc = 0;
+        printf("* straightc [%c]: %d (%d)\n", RankSym[i], straightc, state->rankc[i]);
+    }
+    printf("Has straight: %c\n", straightc == 5 ? 'Y' : 'N');
+}
+
 void evaluate(Hand *hand, Board *board)
 {
     EvalState state = {
@@ -111,17 +128,5 @@ void evaluate(Hand *hand, Board *board)
 
     _of_a_kind(&state);
 
-    int straightc = state.rankc[RANK_A] ? 1 : 0;
-    printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, state.rankc[RANK_A]);
-    for (int i = 0; i < 13; ++i) {
-        if (state.rankc[i]) {
-            ++straightc;
-            if (straightc == 5)
-                break;
-        }
-        else
-            straightc = 0;
-        printf("* straightc [%c]: %d (%d)\n", RankSym[i], straightc, state.rankc[i]);
-    }
-    printf("Has straight: %c\n", straightc == 5 ? 'Y' : 'N');
+    _straight(&state);
 }
