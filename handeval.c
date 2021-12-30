@@ -112,19 +112,15 @@ static HandEval _of_a_kind(EvalState *state)
         };
     }
 
-    static const struct {uint8_t kind; const char *text; HandEval eval;} kind_order[] = {
-        {KIND_QUADS, "Quads", EVAL_QUADS},
-        {KIND_FH, "Full House", EVAL_BOAT},
-        {KIND_TRIPS, "Trips", EVAL_TRIPS},
-        {KIND_2PAIR, "Two Pair", EVAL_TWOPAIR},
-        {KIND_PAIR, "Pair", EVAL_PAIR},
-        {KIND_NONE, NULL, EVAL_NONE},
+    static const struct {uint8_t kind; HandEval eval;} kind_order[] = {
+        {KIND_QUADS, EVAL_QUADS},
+        {KIND_FH, EVAL_BOAT},
+        {KIND_TRIPS, EVAL_TRIPS},
+        {KIND_2PAIR, EVAL_TWOPAIR},
+        {KIND_PAIR, EVAL_PAIR},
     };
 
-    for (int i = 0; i < 5; ++i) {
-        char sym = (HAS_FLAG(ofakind, kind_order[i].kind)) ? 'Y' : 'N';
-        printf("%s: %c\n", kind_order[i].text, sym);
-
+    for (int i = 0; i < ARRAYLEN(kind_order); ++i) {
         if (HAS_FLAG(ofakind, kind_order[i].kind))
             return kind_order[i].eval;
     }
