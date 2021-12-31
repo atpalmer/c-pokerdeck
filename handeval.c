@@ -99,7 +99,7 @@ static HandEval _of_a_kind(EvalState *state)
     for (int i = 0; i < 13; ++i) {
         switch (state->rankc[i]) {
         case 2:
-            ofakind |= ((ofakind & KIND_PAIR) == KIND_PAIR) ? KIND_2PAIR : KIND_PAIR;
+            ofakind |= HAS_FLAG(ofakind, KIND_PAIR) ? KIND_2PAIR : KIND_PAIR;
             break;
         case 3:
             ofakind |= KIND_TRIPS;
