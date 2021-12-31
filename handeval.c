@@ -131,7 +131,6 @@ static HandEval _of_a_kind(EvalState *state)
 static HandEval _straight(EvalState *state)
 {
     int straightc = state->rankc[RANK_A] ? 1 : 0;
-    printf("* straightc [%c]: %d (%d)\n", RankSym[RANK_A], straightc, state->rankc[RANK_A]);
     for (int i = 0; i < 13; ++i) {
         if (state->rankc[i]) {
             ++straightc;
@@ -140,16 +139,14 @@ static HandEval _straight(EvalState *state)
         }
         else
             straightc = 0;
-        printf("* straightc [%c]: %d (%d)\n", RankSym[i], straightc, state->rankc[i]);
     }
-    printf("Has straight: %c\n", straightc == 5 ? 'Y' : 'N');
     return straightc == 5 ? EVAL_STRAIGHT : EVAL_NONE;
 }
 
 static void _display(HandEval eval, const char *trying)
 {
-    printf("Trying %s:\n", trying);
-    printf("* Result: %s\n", (eval) ? EVAL_TEXT(eval) : "None");
+    printf("Trying... %10s: ", trying);
+    printf("%s\n", (eval) ? EVAL_TEXT(eval) : "None");
 }
 
 void evaluate(Hand *hand, Board *board)
@@ -169,11 +166,10 @@ void evaluate(Hand *hand, Board *board)
         .rankc = {0},
     };
 
-
     _count_suits(&state);
     _count_ranks(&state);
 
-    _display(_flush(&state), "Flush");
     _display(_of_a_kind(&state), "Of A Kind");
+    _display(_flush(&state), "Flush");
     _display(_straight(&state), "Straight");
 }
