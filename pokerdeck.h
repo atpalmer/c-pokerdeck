@@ -22,6 +22,10 @@ typedef struct {
     char text[3];  /* '\0'-terminated string */
 } Card;
 
+Card Card_from_id(int id);
+
+#define CARD_TEXT(c)    (Card_from_id(c).text)
+
 typedef struct {
     int count;
     int cards[52];

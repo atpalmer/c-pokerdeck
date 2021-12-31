@@ -98,9 +98,16 @@ static void _count_ranks(EvalState *state)
 
 static HandEval _flush(EvalState *state)
 {
-    for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
-        if (state->suitc[i] >= 5)
+    for (int suitx = 0; suitx < ARRAYLEN(state->suitc); ++suitx) {
+        if (state->suitc[suitx] >= 5) {
+            printf("flush cards: ");
+            for (int i = 0; i < state->cardlen; ++i) {
+                if (suitx == SUITX(state->cards[i]))
+                    printf(" [%s]", CARD_TEXT(state->cards[i]));
+            }
+            printf("\n");
             return EVAL_FLUSH;
+        }
     }
 
     return EVAL_NONE;
