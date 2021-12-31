@@ -45,6 +45,28 @@ typedef struct {
     int rankc[13];
 } EvalState;
 
+static void _sort_cards(EvalState *state)
+{
+    for (int i = 0; i < state->cardlen - 1; ++i) {
+        int highx = i;
+        for (int j = i + 1; j < state->cardlen; ++j) {
+            if (RANKX(state->cards[j]) > RANKX(state->cards[highx]))
+                highx = j;
+        }
+        if (highx == i)
+            continue;
+        int tmp = state->cards[highx];
+        state->cards[highx] = state->cards[i];
+        state->cards[i] = tmp;
+    }
+
+    printf("Sorted Card IDs:");
+    for (int i = 0; i < state->cardlen; ++i) {
+        printf(" [%d:%c]", state->cards[i], RANK(state->cards[i]));
+    }
+    printf("\n");
+}
+
 static void _count_suits(EvalState *state)
 {
     for (int i = 0; i < state->cardlen; ++i) {
@@ -166,6 +188,7 @@ void evaluate(Hand *hand, Board *board)
         .rankc = {0},
     };
 
+    _sort_cards(&state);
     _count_suits(&state);
     _count_ranks(&state);
 
