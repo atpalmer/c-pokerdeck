@@ -96,17 +96,28 @@ static void _count_ranks(EvalState *state)
     }
 }
 
+#define CARD_EVALBITS(card, pos)        (RANKX(card) << ((4 - (pos)) * 4))
+#define EVALBITS_CARDRANK(bits, pos)    (((bits) >> ((4 - (pos)) * 4)) & 0x000000f)
+
 static HandEval _flush(EvalState *state)
 {
     for (int suitx = 0; suitx < ARRAYLEN(state->suitc); ++suitx) {
         if (state->suitc[suitx] >= 5) {
-            printf("flush cards: ");
-            for (int i = 0; i < state->cardlen; ++i) {
-                if (suitx == SUITX(state->cards[i]))
-                    printf(" [%s]", CARD_TEXT(state->cards[i]));
+            uint32_t evalbits = 0;
+            for (int handpos = 0, i = 0; handpos < 5 && i < state->cardlen; ++i) {
+                if (suitx == SUITX(state->cards[i])) {
+                    evalbits |= CARD_EVALBITS(state->cards[i], handpos++);
+                }
+            }
+
+            printf("flush cards from hand [bits: 0x%x]: ", EVAL_FLUSH | evalbits);
+            for (int i = 0; i < 5; ++i) {
+                int rankx = EVALBITS_CARDRANK(evalbits, i);
+                printf(" [%c]", RankSym[rankx]);
             }
             printf("\n");
-            return EVAL_FLUSH;
+
+            return EVAL_FLUSH | evalbits;
         }
     }
 
