@@ -23,6 +23,10 @@ enum {
 
 #define EVALX(e)    ((e) >> (4 * 5))
 
+#define RANK_EVALBITS(rank, pos)        ((rank) << ((4 - (pos)) * 4))
+#define CARD_EVALBITS(card, pos)        (RANK_EVALBITS(RANKX(card), pos))
+#define EVALBITS_CARDRANK(bits, pos)    (((bits) >> ((4 - (pos)) * 4)) & 0x000000f)
+
 static const char *_EVAL_TEXT[] = {
     [EVALX(EVAL_NONE)]     = "High card",
     [EVALX(EVAL_PAIR)]     = "Pair",
@@ -96,9 +100,6 @@ static void _count_ranks(EvalState *state)
     }
 }
 
-#define CARD_EVALBITS(card, pos)        (RANKX(card) << ((4 - (pos)) * 4))
-#define EVALBITS_CARDRANK(bits, pos)    (((bits) >> ((4 - (pos)) * 4)) & 0x000000f)
-
 static HandEval _flush(EvalState *state)
 {
     for (int suitx = 0; suitx < ARRAYLEN(state->suitc); ++suitx) {
@@ -109,13 +110,6 @@ static HandEval _flush(EvalState *state)
                     evalbits |= CARD_EVALBITS(state->cards[i], handpos++);
                 }
             }
-
-            printf("flush cards from hand [bits: 0x%x]: ", EVAL_FLUSH | evalbits);
-            for (int i = 0; i < 5; ++i) {
-                int rankx = EVALBITS_CARDRANK(evalbits, i);
-                printf(" [%c]", RankSym[rankx]);
-            }
-            printf("\n");
 
             return EVAL_FLUSH | evalbits;
         }
@@ -170,23 +164,52 @@ static HandEval _of_a_kind(EvalState *state)
 
 static HandEval _straight(EvalState *state)
 {
-    int straightc = state->rankc[RANK_A] ? 1 : 0;
-    for (int i = 0; i < 13; ++i) {
+    int straightc = 0;
+    uint32_t evalbits = 0;
+    int bitpos = 0;
+    for (int i = 12; i >= 0; --i) {
         if (state->rankc[i]) {
+            evalbits |= RANK_EVALBITS(i, bitpos);
+            ++bitpos;
             ++straightc;
             if (straightc == 5)
-                break;
+                goto straight;
         }
-        else
+        else {
             straightc = 0;
+            evalbits = 0;
+            bitpos = 0;
+        }
     }
-    return straightc == 5 ? EVAL_STRAIGHT : EVAL_NONE;
+    if (state->rankc[RANK_A]) {
+        evalbits |= RANK_A;
+        ++straightc;
+    }
+    if (straightc == 5)
+        goto straight;
+
+    return EVAL_NONE;
+
+straight:
+    return EVAL_STRAIGHT | evalbits;
 }
 
 static void _display(HandEval eval, const char *trying)
 {
     printf("Trying... %10s: ", trying);
-    printf("%s\n", (eval) ? EVAL_TEXT(eval) : "None");
+
+    if (eval) {
+        printf("%s [bits: 0x%x];", EVAL_TEXT(eval), eval);
+
+        printf(" hand ranks: ");
+        for (int i = 0; i < 5; ++i) {
+            int rankx = EVALBITS_CARDRANK(eval, i);
+            printf(" [%c]", RankSym[rankx]);
+        }
+        printf("\n");
+    }
+    else
+        printf("None\n");
 }
 
 void evaluate(Hand *hand, Board *board)
