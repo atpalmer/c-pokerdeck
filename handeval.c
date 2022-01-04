@@ -26,6 +26,7 @@ enum {
 #define RANK_EVALBITS(rank, pos)        ((rank) << ((4 - (pos)) * 4))
 #define CARD_EVALBITS(card, pos)        (RANK_EVALBITS(RANKX(card), pos))
 #define EVALBITS_CARDRANK(bits, pos)    (((bits) >> ((4 - (pos)) * 4)) & 0x000000f)
+#define RANK_BITS(r1, r2, r3, r4, r5)   ((r1) << (4 * 4) | (r2) << (3 * 4) | (r3) << (2 * 4) | (r4) << (1 * 4) | (r5) << (0 * 4))
 
 static const char *_EVAL_TEXT[] = {
     [EVALX(EVAL_NONE)]     = "High card",
@@ -110,34 +111,75 @@ static HandEval _of_a_kind(EvalState *state)
         KIND_FH = KIND_PAIR | KIND_TRIPS,
     };
 
+    struct kind_entry {
+        uint8_t kind;
+        HandEval eval;
+        int highcards;
+    };
+
+    struct kind_entry quadsentry = {KIND_QUADS, EVAL_QUADS, 1};
+    struct kind_entry boatentry = {KIND_FH, EVAL_BOAT, 0};
+    struct kind_entry tripsentry = {KIND_TRIPS, EVAL_TRIPS, 2};
+    struct kind_entry twopairentry = {KIND_2PAIR, EVAL_TWOPAIR, 1};
+    struct kind_entry pairentry = {KIND_PAIR, EVAL_PAIR, 3};
+
+    struct kind_entry *kind_order[] = {
+        &quadsentry,
+        &boatentry,
+        &tripsentry,
+        &twopairentry,
+        &pairentry,
+    };
+
     uint8_t ofakind = 0;
-    for (int i = 0; i < 13; ++i) {
+    for (int i = 12; i >= 0; --i) {
         switch (state->rankc[i]) {
+        case 1:
+            for (int k = 0; k < ARRAYLEN(kind_order); ++k) {
+                struct kind_entry *entry = kind_order[k];
+                if (entry->highcards) {
+                    --entry->highcards;
+                    entry->eval |= (i << (entry->highcards * 4));
+                }
+            }
+            break;
         case 2:
-            ofakind |= HAS_FLAG(ofakind, KIND_PAIR) ? KIND_2PAIR : KIND_PAIR;
+            if (HAS_FLAG(ofakind, KIND_PAIR)) {
+                if (HAS_FLAG(ofakind, KIND_2PAIR))
+                    continue;
+                ofakind |= KIND_2PAIR;
+                twopairentry.eval |= RANK_BITS(0, 0, i, i, 0);
+            }
+            else {
+                if (HAS_FLAG(ofakind, KIND_PAIR))
+                    continue;
+                ofakind |= KIND_PAIR;
+                pairentry.eval |= RANK_BITS(i, i, 0, 0, 0);
+                twopairentry.eval |= RANK_BITS(i, i, 0, 0, 0);
+                boatentry.eval |= RANK_BITS(0, 0, 0, i, i);
+            }
             break;
         case 3:
+            if (HAS_FLAG(ofakind, KIND_TRIPS))
+                continue;
             ofakind |= KIND_TRIPS;
+            tripsentry.eval |= RANK_BITS(i, i, i, 0, 0);
+            boatentry.eval |= RANK_BITS(i, i, i, 0, 0);
             break;
         case 4:
+            if (HAS_FLAG(ofakind, KIND_QUADS))
+                continue;
             ofakind |= KIND_QUADS;
+            quadsentry.eval |= RANK_BITS(i, i, i, i, 0);
             break;
         default:
             break;
         };
     }
 
-    static const struct {uint8_t kind; HandEval eval;} kind_order[] = {
-        {KIND_QUADS, EVAL_QUADS},
-        {KIND_FH, EVAL_BOAT},
-        {KIND_TRIPS, EVAL_TRIPS},
-        {KIND_2PAIR, EVAL_TWOPAIR},
-        {KIND_PAIR, EVAL_PAIR},
-    };
-
     for (int i = 0; i < ARRAYLEN(kind_order); ++i) {
-        if (HAS_FLAG(ofakind, kind_order[i].kind))
-            return kind_order[i].eval;
+        if (HAS_FLAG(ofakind, kind_order[i]->kind))
+            return kind_order[i]->eval;
     }
 
     return EVAL_NONE;
