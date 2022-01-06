@@ -18,7 +18,7 @@ enum {
     EVAL_BOAT       = 0x00600000,
     EVAL_QUADS      = 0x00700000,
     EVAL_STFLUSH    = 0x00800000,
-    EVAL_ROYAL      = 0x00900000,
+    EVAL_ROYAL      = 0x009cba98,
 };
 
 #define EVALX(e)    ((e) >> (4 * 5))
@@ -48,6 +48,7 @@ typedef struct {
     int cards[7];
     int suitc[4];
     int rankc[13];
+    uint8_t ranksuits[13];
 } EvalState;
 
 static void _init(EvalState *state)
@@ -76,6 +77,14 @@ static void _init(EvalState *state)
     for (int i = 0; i < state->cardlen; ++i) {
         int rankx = RANKX(state->cards[i]);
         ++state->rankc[rankx];
+    }
+
+    /* count ranksuits */
+    for (int i = 0; i < state->cardlen; ++i) {
+        int rankx = RANKX(state->cards[i]);
+        int suitx = SUITX(state->cards[i]);
+        uint8_t suitbits = 1 << suitx;
+        state->ranksuits[rankx] = suitbits;
     }
 }
 
@@ -182,6 +191,43 @@ static HandEval _of_a_kind(EvalState *state)
     return EVAL_NONE;
 }
 
+static HandEval _straight_flush(EvalState *state)
+{
+    uint32_t evalbits = 0;
+    int straightc = 0;
+    uint8_t suitmask = 0;
+    for (int i = ARRAYLEN(state->ranksuits); i >= 0; --i) {
+        suitmask &= state->ranksuits[i];
+        if (suitmask) {
+            evalbits |= RANK_EVALBITS(i, straightc);
+            ++straightc;
+            if (straightc == 5)
+                goto straightflush;
+        }
+        else if (state->ranksuits[i]) {
+            evalbits = RANK_EVALBITS(i, 0);
+            suitmask = state->ranksuits[i];
+            straightc = 1;
+        }
+        else {
+            evalbits = 0;
+            suitmask = 0;
+            straightc = 0;
+        }
+    }
+    if (suitmask & state->ranksuits[RANK_A]) {
+        evalbits |= RANK_A;
+        ++straightc;
+        if (straightc == 5)
+            goto straightflush;
+    }
+
+    return EVAL_NONE;
+
+straightflush:
+    return (evalbits == 0xcba98) ? EVAL_ROYAL : (EVAL_STFLUSH | evalbits);
+}
+
 static HandEval _straight(EvalState *state)
 {
     int straightc = 0;
@@ -275,6 +321,7 @@ void evaluate(Hand *hand, Board *board)
 
     _display_counts(&state);
 
+    _display(_straight_flush(&state), "Str. Flush");
     _display(_of_a_kind(&state), "Of A Kind");
     _display(_flush(&state), "Flush");
     _display(_straight(&state), "Straight");
