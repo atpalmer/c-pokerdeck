@@ -274,6 +274,7 @@ void evaluate(Hand *hand, Board *board)
         },
         .suitc = {0, 0, 0, 0},
         .rankc = {0},
+        .ranksuits = {0},
     };
 
     _init(&state);
