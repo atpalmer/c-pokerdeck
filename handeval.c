@@ -228,28 +228,6 @@ static HandEval _high_card(EvalState *state)
     return EVAL_NONE | evalbits;
 }
 
-static void _display_counts(EvalState *state)
-{
-    printf("Sorted Card IDs:");
-    for (int i = 0; i < ARRAYLEN(state->cards); ++i) {
-        printf(" [%d:%c]", state->cards[i], RANK(state->cards[i]));
-    }
-    printf("\n");
-
-    printf("Suit counts:\n");
-    for (int i = 0; i < ARRAYLEN(state->suitc); ++i) {
-        char flushsym = (state->suitc[i] >= 5) ? '*' : ' ';
-        printf("\t%c%c: %d\n", flushsym, SuitSym[i], state->suitc[i]);
-    }
-
-    printf("Rank counts:\n");
-    for (int i = 0; i < 13; ++i) {
-        if (!state->rankc[i])
-            continue;
-        printf("\t%c: %d\n", RankSym[i], state->rankc[i]);
-    }
-}
-
 static void _display(HandEval eval)
 {
     printf("Result: %s [", EVAL_TEXT(eval));
@@ -278,7 +256,6 @@ void evaluate(Hand *hand, Board *board)
     };
 
     _init(&state);
-    _display_counts(&state);
 
     HandEval stfl = _straight_flush(&state);
     if (stfl) {
