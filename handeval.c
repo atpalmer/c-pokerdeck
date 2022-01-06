@@ -44,7 +44,6 @@ static const char *_EVAL_TEXT[] = {
 #define EVAL_TEXT(e)    (_EVAL_TEXT[EVALX(e)])
 
 typedef struct {
-    int cardlen;
     int cards[7];
     int suitc[4];
     int rankc[13];
@@ -54,9 +53,9 @@ typedef struct {
 static void _init(EvalState *state)
 {
     /* sort */
-    for (int i = 0; i < state->cardlen - 1; ++i) {
+    for (int i = 0; i < ARRAYLEN(state->cards) - 1; ++i) {
         int highx = i;
-        for (int j = i + 1; j < state->cardlen; ++j) {
+        for (int j = i + 1; j < ARRAYLEN(state->cards); ++j) {
             if (RANKX(state->cards[j]) > RANKX(state->cards[highx]))
                 highx = j;
         }
@@ -68,19 +67,19 @@ static void _init(EvalState *state)
     }
 
     /* count suits */
-    for (int i = 0; i < state->cardlen; ++i) {
+    for (int i = 0; i < ARRAYLEN(state->cards); ++i) {
         int suitx = SUITX(state->cards[i]);
         ++state->suitc[suitx];
     }
 
     /* count ranks */
-    for (int i = 0; i < state->cardlen; ++i) {
+    for (int i = 0; i < ARRAYLEN(state->cards); ++i) {
         int rankx = RANKX(state->cards[i]);
         ++state->rankc[rankx];
     }
 
     /* count ranksuits */
-    for (int i = 0; i < state->cardlen; ++i) {
+    for (int i = 0; i < ARRAYLEN(state->cards); ++i) {
         int rankx = RANKX(state->cards[i]);
         int suitx = SUITX(state->cards[i]);
         uint8_t suitbits = 1 << suitx;
@@ -93,7 +92,7 @@ static HandEval _flush(EvalState *state)
     for (int suitx = 0; suitx < ARRAYLEN(state->suitc); ++suitx) {
         if (state->suitc[suitx] >= 5) {
             uint32_t evalbits = 0;
-            for (int handpos = 0, i = 0; handpos < 5 && i < state->cardlen; ++i) {
+            for (int handpos = 0, i = 0; handpos < 5 && i < ARRAYLEN(state->cards); ++i) {
                 if (suitx == SUITX(state->cards[i])) {
                     evalbits |= CARD_EVALBITS(state->cards[i], handpos++);
                 }
@@ -263,7 +262,7 @@ straight:
 static void _display_counts(EvalState *state)
 {
     printf("Sorted Card IDs:");
-    for (int i = 0; i < state->cardlen; ++i) {
+    for (int i = 0; i < ARRAYLEN(state->cards); ++i) {
         printf(" [%d:%c]", state->cards[i], RANK(state->cards[i]));
     }
     printf("\n");
@@ -303,7 +302,6 @@ static void _display(HandEval eval, const char *trying)
 void evaluate(Hand *hand, Board *board)
 {
     EvalState state = {
-        .cardlen = ARRAYLEN(state.cards),
         .cards = {
             hand->cards[0].id,
             hand->cards[1].id,
