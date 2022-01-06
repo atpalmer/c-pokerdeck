@@ -242,19 +242,18 @@ static void _display_counts(EvalState *state)
     }
 }
 
-static void _display(HandEval eval, const char *trying)
+static void _display(HandEval eval)
 {
-    printf("Trying... %10s: ", trying);
+    printf("Result: ");
 
     if (eval) {
-        printf("%s [bits: 0x%x];", EVAL_TEXT(eval), eval);
-
-        printf(" hand ranks: ");
+        printf("%s", EVAL_TEXT(eval));
+        printf(" [");
         for (int i = 0; i < 5; ++i) {
             int rankx = EVALBITS_CARDRANK(eval, i);
-            printf(" [%c]", RankSym[rankx]);
+            printf("%c", RankSym[rankx]);
         }
-        printf("\n");
+        printf("]\n");
     }
     else
         printf("None\n");
@@ -277,11 +276,31 @@ void evaluate(Hand *hand, Board *board)
     };
 
     _init(&state);
-
     _display_counts(&state);
 
-    _display(_straight_flush(&state), "Str. Flush");
-    _display(_of_a_kind(&state), "Of A Kind");
-    _display(_flush(&state), "Flush");
-    _display(_straight(&state), "Straight");
+    HandEval stfl = _straight_flush(&state);
+    if (stfl) {
+        _display(stfl);
+        return;
+    }
+
+    HandEval ofakind = _of_a_kind(&state);
+    if (ofakind > EVAL_FLUSH) {
+        _display(ofakind);
+        return;
+    }
+
+    HandEval flush = _flush(&state);
+    if (flush) {
+        _display(flush);
+        return;
+    }
+
+    HandEval straight = _straight(&state);
+    if (straight) {
+        _display(straight);
+        return;
+    }
+
+    _display(ofakind);
 }
