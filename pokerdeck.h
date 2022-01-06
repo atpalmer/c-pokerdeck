@@ -55,7 +55,7 @@ typedef struct {
 typedef uint32_t HandEval;
 
 enum {
-    EVAL_NONE       = 0,
+    EVAL_NONE       = 0x00000000,
     EVAL_PAIR       = 0x00100000,
     EVAL_TWOPAIR    = 0x00200000,
     EVAL_TRIPS      = 0x00300000,

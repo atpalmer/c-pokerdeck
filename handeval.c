@@ -220,6 +220,14 @@ straight:
     return EVAL_STRAIGHT | evalbits;
 }
 
+static HandEval _high_card(EvalState *state)
+{
+    uint32_t evalbits = 0x0;
+    for (int i = 0; i < 5; ++i)
+        evalbits |= CARD_EVALBITS(state->cards[i], i);
+    return EVAL_NONE | evalbits;
+}
+
 static void _display_counts(EvalState *state)
 {
     printf("Sorted Card IDs:");
@@ -244,19 +252,12 @@ static void _display_counts(EvalState *state)
 
 static void _display(HandEval eval)
 {
-    printf("Result: ");
-
-    if (eval) {
-        printf("%s", EVAL_TEXT(eval));
-        printf(" [");
-        for (int i = 0; i < 5; ++i) {
-            int rankx = EVALBITS_CARDRANK(eval, i);
-            printf("%c", RankSym[rankx]);
-        }
-        printf("]\n");
+    printf("Result: %s [", EVAL_TEXT(eval));
+    for (int i = 0; i < 5; ++i) {
+        int rankx = EVALBITS_CARDRANK(eval, i);
+        printf("%c", RankSym[rankx]);
     }
-    else
-        printf("None\n");
+    printf("]\n");
 }
 
 void evaluate(Hand *hand, Board *board)
@@ -302,5 +303,10 @@ void evaluate(Hand *hand, Board *board)
         return;
     }
 
-    _display(ofakind);
+    if (ofakind) {
+        _display(ofakind);
+        return;
+    }
+
+    _display(_high_card(&state));
 }
