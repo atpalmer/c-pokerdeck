@@ -195,7 +195,7 @@ static HandEval _straight_flush(EvalState *state)
     uint32_t evalbits = 0;
     int straightc = 0;
     uint8_t suitmask = 0;
-    for (int i = ARRAYLEN(state->ranksuits); i >= 0; --i) {
+    for (int i = RANK_A; i >= 0; --i) {
         suitmask &= state->ranksuits[i];
         if (suitmask) {
             evalbits |= RANK_EVALBITS(i, straightc);
@@ -229,29 +229,26 @@ straightflush:
 
 static HandEval _straight(EvalState *state)
 {
-    int straightc = 0;
     uint32_t evalbits = 0;
-    int bitpos = 0;
-    for (int i = 12; i >= 0; --i) {
+    int straightc = 0;
+    for (int i = RANK_A; i >= 0; --i) {
         if (state->rankc[i]) {
-            evalbits |= RANK_EVALBITS(i, bitpos);
-            ++bitpos;
+            evalbits |= RANK_EVALBITS(i, straightc);
             ++straightc;
             if (straightc == 5)
                 goto straight;
         }
         else {
-            straightc = 0;
             evalbits = 0;
-            bitpos = 0;
+            straightc = 0;
         }
     }
     if (state->rankc[RANK_A]) {
         evalbits |= RANK_A;
         ++straightc;
+        if (straightc == 5)
+            goto straight;
     }
-    if (straightc == 5)
-        goto straight;
 
     return EVAL_NONE;
 
