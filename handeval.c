@@ -238,7 +238,7 @@ static void _display(HandEval eval)
     printf("]\n");
 }
 
-void evaluate(Hand *hand, Board *board)
+HandEval _evaluate(Hand *hand, Board *board)
 {
     EvalState state = {
         .cards = {
@@ -258,33 +258,29 @@ void evaluate(Hand *hand, Board *board)
     _init(&state);
 
     HandEval stfl = _straight_flush(&state);
-    if (stfl) {
-        _display(stfl);
-        return;
-    }
+    if (stfl)
+        return stfl;
 
     HandEval ofakind = _of_a_kind(&state);
-    if (ofakind > EVAL_FLUSH) {
-        _display(ofakind);
-        return;
-    }
+    if (ofakind > EVAL_FLUSH)
+        return ofakind;
 
     HandEval flush = _flush(&state);
-    if (flush) {
-        _display(flush);
-        return;
-    }
+    if (flush)
+        return flush;
 
     HandEval straight = _straight(&state);
-    if (straight) {
-        _display(straight);
-        return;
-    }
+    if (straight)
+        return straight;
 
-    if (ofakind) {
-        _display(ofakind);
-        return;
-    }
+    if (ofakind)
+        return ofakind;
 
-    _display(_high_card(&state));
+    return _high_card(&state);
+}
+
+void evaluate(Hand *hand, Board *board)
+{
+    HandEval eval = _evaluate(hand, board);
+    _display(eval);
 }
