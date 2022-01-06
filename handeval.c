@@ -2,46 +2,10 @@
 #include <stdlib.h>
 #include "pokerdeck.h"
 
-/*
- * Hand evaluation format encodes leading hand qualification,
- * followed by ordered card ranks (4 bits x 5 cards).
- */
-typedef uint32_t HandEval;
-
-enum {
-    EVAL_NONE       = 0,
-    EVAL_PAIR       = 0x00100000,
-    EVAL_TWOPAIR    = 0x00200000,
-    EVAL_TRIPS      = 0x00300000,
-    EVAL_STRAIGHT   = 0x00400000,
-    EVAL_FLUSH      = 0x00500000,
-    EVAL_BOAT       = 0x00600000,
-    EVAL_QUADS      = 0x00700000,
-    EVAL_STFLUSH    = 0x00800000,
-    EVAL_ROYAL      = 0x009cba98,
-};
-
-#define EVALX(e)    ((e) >> (4 * 5))
-
 #define RANK_EVALBITS(rank, pos)        ((rank) << ((4 - (pos)) * 4))
 #define CARD_EVALBITS(card, pos)        (RANK_EVALBITS(RANKX(card), pos))
 #define EVALBITS_CARDRANK(bits, pos)    (((bits) >> ((4 - (pos)) * 4)) & 0x000000f)
 #define RANK_BITS(r1, r2, r3, r4, r5)   ((r1) << (4 * 4) | (r2) << (3 * 4) | (r3) << (2 * 4) | (r4) << (1 * 4) | (r5) << (0 * 4))
-
-static const char *_EVAL_TEXT[] = {
-    [EVALX(EVAL_NONE)]     = "High card",
-    [EVALX(EVAL_PAIR)]     = "Pair",
-    [EVALX(EVAL_TWOPAIR)]  = "Two Pair",
-    [EVALX(EVAL_TRIPS)]    = "Three of a Kind",
-    [EVALX(EVAL_STRAIGHT)] = "Straight",
-    [EVALX(EVAL_FLUSH)]    = "Flush",
-    [EVALX(EVAL_BOAT)]     = "Full House",
-    [EVALX(EVAL_QUADS)]    = "Four of a Kind",
-    [EVALX(EVAL_STFLUSH)]  = "Straight Flush",
-    [EVALX(EVAL_ROYAL)]    = "Royal Flush",
-};
-
-#define EVAL_TEXT(e)    (_EVAL_TEXT[EVALX(e)])
 
 typedef struct {
     int cards[7];

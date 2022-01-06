@@ -48,6 +48,42 @@ typedef struct {
     Card cards[5];
 } Board;
 
+/*
+ * Hand evaluation format encodes leading hand qualification,
+ * followed by ordered card ranks (4 bits x 5 cards).
+ */
+typedef uint32_t HandEval;
+
+enum {
+    EVAL_NONE       = 0,
+    EVAL_PAIR       = 0x00100000,
+    EVAL_TWOPAIR    = 0x00200000,
+    EVAL_TRIPS      = 0x00300000,
+    EVAL_STRAIGHT   = 0x00400000,
+    EVAL_FLUSH      = 0x00500000,
+    EVAL_BOAT       = 0x00600000,
+    EVAL_QUADS      = 0x00700000,
+    EVAL_STFLUSH    = 0x00800000,
+    EVAL_ROYAL      = 0x009cba98,
+};
+
+#define EVALX(e)    ((e) >> (4 * 5))
+
+static const char *_EVALX_TEXT[] = {
+    [EVALX(EVAL_NONE)]     = "High card",
+    [EVALX(EVAL_PAIR)]     = "Pair",
+    [EVALX(EVAL_TWOPAIR)]  = "Two Pair",
+    [EVALX(EVAL_TRIPS)]    = "Three of a Kind",
+    [EVALX(EVAL_STRAIGHT)] = "Straight",
+    [EVALX(EVAL_FLUSH)]    = "Flush",
+    [EVALX(EVAL_BOAT)]     = "Full House",
+    [EVALX(EVAL_QUADS)]    = "Four of a Kind",
+    [EVALX(EVAL_STFLUSH)]  = "Straight Flush",
+    [EVALX(EVAL_ROYAL)]    = "Royal Flush",
+};
+
+#define EVAL_TEXT(e)    (_EVALX_TEXT[EVALX(e)])
+
 void evaluate(Hand *hand, Board *board);
 
 #endif
