@@ -55,6 +55,11 @@ Player Player_deal(const char *name, Deck *deck)
     return result;
 }
 
+void Player_evaluate(Player *p, Board *b)
+{
+    p->eval = evaluate(p->cards, b->cards);
+}
+
 void Player_show_hand(Player *p)
 {
     printf("%s:\n", p->name);
@@ -158,8 +163,8 @@ int main(void)
     Player_show_hand(&hero);
     Player_show_hand(&villain);
     deal_board(&board, deck);
-    hero.eval = evaluate(hero.cards, board.cards);
-    villain.eval = evaluate(villain.cards, board.cards);
+    Player_evaluate(&hero, &board);
+    Player_evaluate(&villain, &board);
     printf("Result:\n");
     Player_show_eval(&hero);
     Player_show_eval(&villain);
