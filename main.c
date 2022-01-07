@@ -185,6 +185,14 @@ void Game_deal_board(Game *this)
     deal_board(&this->board, this->deck);
 }
 
+#define WINNING_PLAYER(a, b) (((a)->eval == (b)->eval) ? NULL : (((a)->eval > (b)->eval) ? (a) : (b)))
+
+void Game_show_winner(Game *this)
+{
+    Player *winner = WINNING_PLAYER(&this->hero, &this->villain);
+    printf("%10s: %s\n", "Winner", winner ? winner->name : "Chop");
+}
+
 int main(void)
 {
     Game *game = Game_new();
@@ -199,6 +207,8 @@ int main(void)
     printf("Result:\n");
     Player_show_eval(&game->hero);
     Player_show_eval(&game->villain);
+
+    Game_show_winner(game);
 
     Game_destroy(game);
 }
