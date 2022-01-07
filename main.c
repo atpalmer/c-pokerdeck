@@ -235,8 +235,15 @@ typedef struct {
 
 void Stats_update(Stats *stats, Player *p, Player *winner)
 {
-    int c1 = HIGHCARD(p->cards);
-    int c2 = LOWCARD(p->cards);
+    int c1, c2;
+
+    if (SUITX(p->cards[0]) == SUITX(p->cards[1])) {
+        c1 = HIGHCARD(p->cards);
+        c2 = LOWCARD(p->cards);
+    } else {
+        c1 = LOWCARD(p->cards);
+        c2 = HIGHCARD(p->cards);
+    }
 
     ++stats->carddeals[c1][c2];
 
@@ -263,9 +270,22 @@ void play_rounds(int rounds)
         for (int c2 = RANK_A; c2 >= 0; --c2) {
             if (!stats.carddeals[c1][c2])
                 continue;
-            printf("[%c-%c]: %.01f%% (%d / %d)\n",
-                RankSym[c1],
-                RankSym[c2],
+
+            int low, hi, suited;
+            if (c1 <= c2) {
+                low = c1;
+                hi = c2;
+                suited = 0;
+            } else {
+                hi = c1;
+                low = c2;
+                suited = 1;
+            }
+
+            printf("[%c%c%c]: %.01f%% (%d / %d)\n",
+                RankSym[hi],
+                RankSym[low],
+                suited ? 's' : 'o',
                 ((double)stats.cardwins[c1][c2] * 100.0) / (double)stats.carddeals[c1][c2],
                 stats.cardwins[c1][c2],
                 stats.carddeals[c1][c2]);
