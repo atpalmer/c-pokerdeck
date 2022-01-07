@@ -1,10 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "pokerdeck.h"
 
 #define RANK_EVALBITS(rank, pos)        ((rank) << ((4 - (pos)) * 4))
 #define CARD_EVALBITS(card, pos)        (RANK_EVALBITS(RANKX(card), pos))
-#define EVALBITS_CARDRANK(bits, pos)    (((bits) >> ((4 - (pos)) * 4)) & 0x000000f)
 #define RANK_BITS(r1, r2, r3, r4, r5)   ((r1) << (4 * 4) | (r2) << (3 * 4) | (r3) << (2 * 4) | (r4) << (1 * 4) | (r5) << (0 * 4))
 
 typedef struct {
@@ -228,17 +226,7 @@ static HandEval _high_card(EvalState *state)
     return EVAL_NONE | evalbits;
 }
 
-static void _display(HandEval eval)
-{
-    printf("Result: %s [", EVAL_TEXT(eval));
-    for (int i = 0; i < 5; ++i) {
-        int rankx = EVALBITS_CARDRANK(eval, i);
-        printf("%c", RankSym[rankx]);
-    }
-    printf("]\n");
-}
-
-HandEval _evaluate(Hand *hand, Board *board)
+HandEval evaluate(Hand *hand, Board *board)
 {
     EvalState state = {
         .cards = {
@@ -277,10 +265,4 @@ HandEval _evaluate(Hand *hand, Board *board)
         return ofakind;
 
     return _high_card(&state);
-}
-
-void evaluate(Hand *hand, Board *board)
-{
-    HandEval eval = _evaluate(hand, board);
-    _display(eval);
 }

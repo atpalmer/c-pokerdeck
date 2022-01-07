@@ -149,6 +149,15 @@ void deal_board(Board *board, Deck *deck)
         board->cards[4].text);
 }
 
+void display_eval(HandEval eval)
+{
+    printf("Result: %s [", EVAL_TEXT(eval));
+    for (int i = 0; i < 5; ++i) {
+        int rankx = EVAL_GETRANK(eval, i);
+        printf("%c", RankSym[rankx]);
+    }
+    printf("]\n");
+}
 
 int main(void)
 {
@@ -158,6 +167,7 @@ int main(void)
     Board board = Board_new();
     Hand_show(&hero);
     deal_board(&board, deck);
-    evaluate(&hero, &board);
+    HandEval eval = evaluate(&hero, &board);
+    display_eval(eval);
     Deck_cleanup(deck);
 }

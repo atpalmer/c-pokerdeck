@@ -1,6 +1,8 @@
 #ifndef POKERDECK_H
 #define POKERDECK_H
 
+#include <sys/types.h>
+
 #define ARRAYLEN(x)         ((ssize_t)(sizeof (x)  / sizeof *(x)))
 #define HAS_FLAG(x, flag)   (((x) & (flag)) == (flag))
 
@@ -82,8 +84,9 @@ static const char *_EVALX_TEXT[] = {
     [EVALX(EVAL_ROYAL)]    = "Royal Flush",
 };
 
-#define EVAL_TEXT(e)    (_EVALX_TEXT[EVALX(e)])
+#define EVAL_TEXT(e)            (_EVALX_TEXT[EVALX(e)])
+#define EVAL_GETRANK(e, pos)    (((e) >> ((4 - (pos)) * 4)) & 0x000000f)
 
-void evaluate(Hand *hand, Board *board);
+HandEval evaluate(Hand *hand, Board *board);
 
 #endif
