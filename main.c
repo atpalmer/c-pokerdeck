@@ -225,14 +225,17 @@ void play_round(void)
     Game_destroy(game);
 }
 
+typedef struct {
+    int herocount;
+    int villaincount;
+    int chopcount;
+    int cardwins[13][13];
+    int carddeals[13][13];
+} Stats;
+
 void play_rounds(int rounds)
 {
-    int herocount = 0;
-    int villaincount = 0;
-    int chopcount = 0;
-
-    int cardwins[13][13] = {0};
-    int carddeals[13][13] = {0};
+    Stats stats = {0};
 
     for (int i = 0; i < rounds; ++i) {
         Game *game = Game_new();
@@ -246,32 +249,32 @@ void play_rounds(int rounds)
         int c2 = RANKX(game->hero.cards[0]) <= RANKX(game->hero.cards[1])
             ? RANKX(game->hero.cards[0])
             : RANKX(game->hero.cards[1]);
-        ++carddeals[c1][c2];
+        ++stats.carddeals[c1][c2];
 
         Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
         if (winner == &game->hero) {
-            ++herocount;
-            ++cardwins[c1][c2];
+            ++stats.herocount;
+            ++stats.cardwins[c1][c2];
         } else if (winner == &game->villain) {
-            ++villaincount;
+            ++stats.villaincount;
         } else {
-            ++chopcount;
+            ++stats.chopcount;
         }
 
         Game_destroy(game);
     }
 
-    printf("Win counts: [Hero: %d] [Villain: %d] [Chops: %d]\n", herocount, villaincount, chopcount);
+    printf("Win counts: [Hero: %d] [Villain: %d] [Chops: %d]\n", stats.herocount, stats.villaincount, stats.chopcount);
     for (int c1 = RANK_A; c1 >= 0; --c1) {
         for (int c2 = RANK_A; c2 >= 0; --c2) {
-            if (!carddeals[c1][c2])
+            if (!stats.carddeals[c1][c2])
                 continue;
             printf("[%c-%c]: %.01f%% (%d / %d)\n",
                 RankSym[c1],
                 RankSym[c2],
-                ((double)cardwins[c1][c2] * 100.0) / (double)carddeals[c1][c2],
-                cardwins[c1][c2],
-                carddeals[c1][c2]);
+                ((double)stats.cardwins[c1][c2] * 100.0) / (double)stats.carddeals[c1][c2],
+                stats.cardwins[c1][c2],
+                stats.carddeals[c1][c2]);
         }
     }
 }
