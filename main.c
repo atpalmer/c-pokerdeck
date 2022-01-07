@@ -226,15 +226,23 @@ void play_round(void)
 }
 
 typedef struct {
-    int herocount;
-    int villaincount;
-    int chopcount;
     int cardwins[13][13];
     int carddeals[13][13];
 } Stats;
 
 #define HIGHCARD(cards) (RANKX((cards)[0]) > RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
 #define LOWCARD(cards) (RANKX((cards)[0]) <= RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
+
+void Stats_update(Stats *stats, Player *p, Player *winner)
+{
+    int c1 = HIGHCARD(p->cards);
+    int c2 = LOWCARD(p->cards);
+
+    ++stats->carddeals[c1][c2];
+
+    if (p == winner)
+        ++stats->cardwins[c1][c2];
+}
 
 void play_rounds(int rounds)
 {
@@ -245,26 +253,12 @@ void play_rounds(int rounds)
         Game_fill_board(game);
         Player_evaluate(&game->hero, &game->board);
         Player_evaluate(&game->villain, &game->board);
-
-        int c1 = HIGHCARD(game->hero.cards);
-        int c2 = LOWCARD(game->hero.cards);
-
-        ++stats.carddeals[c1][c2];
-
         Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
-        if (winner == &game->hero) {
-            ++stats.herocount;
-            ++stats.cardwins[c1][c2];
-        } else if (winner == &game->villain) {
-            ++stats.villaincount;
-        } else {
-            ++stats.chopcount;
-        }
-
+        Stats_update(&stats, &game->hero, winner);
+        Stats_update(&stats, &game->villain, winner);
         Game_destroy(game);
     }
 
-    printf("Win counts: [Hero: %d] [Villain: %d] [Chops: %d]\n", stats.herocount, stats.villaincount, stats.chopcount);
     for (int c1 = RANK_A; c1 >= 0; --c1) {
         for (int c2 = RANK_A; c2 >= 0; --c2) {
             if (!stats.carddeals[c1][c2])
