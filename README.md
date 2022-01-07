@@ -6,12 +6,13 @@ Sample output:
 
 ```
 Hero:
-	7s Ad
+	Ts Ad
 Flop:
-	9h 2d 9s
+	2d Kh Qc
 Turn:
-	9h 2d 9s 7d
+	2d Kh Qc Qh
 River:
-	9h 2d 9s 7d Js
+	2d Kh Qc Qh Ac
+Result: Two Pair [AAQQK]
 ```
 
