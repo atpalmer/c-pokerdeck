@@ -233,6 +233,9 @@ typedef struct {
     int carddeals[13][13];
 } Stats;
 
+#define HIGHCARD(cards) (RANKX((cards)[0]) > RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
+#define LOWCARD(cards) (RANKX((cards)[0]) <= RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
+
 void play_rounds(int rounds)
 {
     Stats stats = {0};
@@ -243,12 +246,9 @@ void play_rounds(int rounds)
         Player_evaluate(&game->hero, &game->board);
         Player_evaluate(&game->villain, &game->board);
 
-        int c1 = RANKX(game->hero.cards[0]) > RANKX(game->hero.cards[1])
-            ? RANKX(game->hero.cards[0])
-            : RANKX(game->hero.cards[1]);
-        int c2 = RANKX(game->hero.cards[0]) <= RANKX(game->hero.cards[1])
-            ? RANKX(game->hero.cards[0])
-            : RANKX(game->hero.cards[1]);
+        int c1 = HIGHCARD(game->hero.cards);
+        int c2 = LOWCARD(game->hero.cards);
+
         ++stats.carddeals[c1][c2];
 
         Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
