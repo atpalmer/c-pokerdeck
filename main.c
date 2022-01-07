@@ -153,20 +153,52 @@ void deal_board(Board *board, Deck *deck)
         CARD_TEXT(board->cards[4]));
 }
 
+typedef struct {
+    Deck *deck;
+    Player hero;
+    Player villain;
+    Board board;
+} Game;
+
+Game *Game_new(void)
+{
+    Game *new = malloc(sizeof *new);
+
+    new->deck = Deck_new();
+    Deck_shuffle(new->deck);
+
+    new->hero = Player_deal("Hero", new->deck);
+    new->villain = Player_deal("Villain", new->deck);
+    new->board = Board_new();
+
+    return new;
+}
+
+void Game_destroy(Game *this)
+{
+    Deck_cleanup(this->deck);
+    free(this);
+}
+
+void Game_deal_board(Game *this)
+{
+    deal_board(&this->board, this->deck);
+}
+
 int main(void)
 {
-    Deck *deck = Deck_new();
-    Deck_shuffle(deck);
-    Player hero = Player_deal("Hero", deck);
-    Player villain = Player_deal("Villain", deck);
-    Board board = Board_new();
-    Player_show_hand(&hero);
-    Player_show_hand(&villain);
-    deal_board(&board, deck);
-    Player_evaluate(&hero, &board);
-    Player_evaluate(&villain, &board);
+    Game *game = Game_new();
+
+    Player_show_hand(&game->hero);
+    Player_show_hand(&game->villain);
+
+    Game_deal_board(game);
+    Player_evaluate(&game->hero, &game->board);
+    Player_evaluate(&game->villain, &game->board);
+
     printf("Result:\n");
-    Player_show_eval(&hero);
-    Player_show_eval(&villain);
-    Deck_cleanup(deck);
+    Player_show_eval(&game->hero);
+    Player_show_eval(&game->villain);
+
+    Game_destroy(game);
 }
