@@ -20,7 +20,6 @@ enum {
 };
 
 typedef struct {
-    int id;
     char text[3];  /* '\0'-terminated string */
 } Card;
 
@@ -35,7 +34,7 @@ typedef struct {
 
 typedef struct {
     const char *name;
-    Card cards[2];
+    int cards[2];
 } Hand;
 
 typedef enum {
@@ -47,7 +46,7 @@ typedef enum {
 
 typedef struct {
     BoardState state;
-    Card cards[5];
+    int cards[5];
 } Board;
 
 /*
@@ -87,6 +86,6 @@ static const char *_EVALX_TEXT[] = {
 #define EVAL_TEXT(e)            (_EVALX_TEXT[EVALX(e)])
 #define EVAL_GETRANK(e, pos)    (((e) >> ((4 - (pos)) * 4)) & 0x000000f)
 
-HandEval evaluate(Hand *hand, Board *board);
+HandEval evaluate(int *handcards, int *boardcards);
 
 #endif

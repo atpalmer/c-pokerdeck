@@ -226,17 +226,17 @@ static HandEval _high_card(EvalState *state)
     return EVAL_NONE | evalbits;
 }
 
-HandEval evaluate(Hand *hand, Board *board)
+HandEval evaluate(int *handcards, int *boardcards)
 {
     EvalState state = {
         .cards = {
-            hand->cards[0].id,
-            hand->cards[1].id,
-            board->cards[0].id,
-            board->cards[1].id,
-            board->cards[2].id,
-            board->cards[3].id,
-            board->cards[4].id,
+            handcards[0],
+            handcards[1],
+            boardcards[0],
+            boardcards[1],
+            boardcards[2],
+            boardcards[3],
+            boardcards[4],
         },
         .suitc = {0, 0, 0, 0},
         .rankc = {0},

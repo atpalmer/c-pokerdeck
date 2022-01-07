@@ -9,7 +9,6 @@
 Card Card_from_id(int c)
 {
     Card result = {
-        .id = c,
         .text = {RANK(c), SUIT(c), '\0'},
     };
     return result;
@@ -44,11 +43,11 @@ void Deck_shuffle(Deck *this)
     }
 }
 
-Card Deck_next(Deck *this)
+int Deck_next(Deck *this)
 {
     int id = this->cards[this->count - 1];
     --this->count;
-    return Card_from_id(id);
+    return id;
 }
 
 
@@ -69,7 +68,7 @@ Hand Hand_deal(const char *name, Deck *deck)
 void Hand_show(Hand *hand)
 {
     printf("%s:\n", hand->name);
-    printf("\t%s %s\n", hand->cards[0].text, hand->cards[1].text);
+    printf("\t%s %s\n", CARD_TEXT(hand->cards[0]), CARD_TEXT(hand->cards[1]));
 }
 
 
@@ -123,30 +122,30 @@ void deal_board(Board *board, Deck *deck)
 
     printf("Flop:\n");
     printf("\t%s %s %s\n",
-        board->cards[0].text,
-        board->cards[1].text,
-        board->cards[2].text);
+        CARD_TEXT(board->cards[0]),
+        CARD_TEXT(board->cards[1]),
+        CARD_TEXT(board->cards[2]));
 
     if (!Board_turn(board, deck))
         return;
 
     printf("Turn:\n");
     printf("\t%s %s %s %s\n",
-        board->cards[0].text,
-        board->cards[1].text,
-        board->cards[2].text,
-        board->cards[3].text);
+        CARD_TEXT(board->cards[0]),
+        CARD_TEXT(board->cards[1]),
+        CARD_TEXT(board->cards[2]),
+        CARD_TEXT(board->cards[3]));
 
     if (!Board_river(board, deck))
         return;
 
     printf("River:\n");
     printf("\t%s %s %s %s %s\n",
-        board->cards[0].text,
-        board->cards[1].text,
-        board->cards[2].text,
-        board->cards[3].text,
-        board->cards[4].text);
+        CARD_TEXT(board->cards[0]),
+        CARD_TEXT(board->cards[1]),
+        CARD_TEXT(board->cards[2]),
+        CARD_TEXT(board->cards[3]),
+        CARD_TEXT(board->cards[4]));
 }
 
 void display_eval(const char *name, HandEval eval)
@@ -169,8 +168,8 @@ int main(void)
     Hand_show(&hero);
     Hand_show(&villain);
     deal_board(&board, deck);
-    HandEval heval = evaluate(&hero, &board);
-    HandEval veval = evaluate(&villain, &board);
+    HandEval heval = evaluate(hero.cards, board.cards);
+    HandEval veval = evaluate(villain.cards, board.cards);
     printf("Result:\n");
     display_eval(hero.name, heval);
     display_eval(villain.name, veval);
