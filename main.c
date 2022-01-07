@@ -23,7 +23,6 @@ void Deck_cleanup(Deck *this)
 
 void Deck_shuffle(Deck *this)
 {
-    srand(time(NULL));
     for (int i = 0; i < this->count; ++i) {
         int newpos = rand() % this->count;
         int tmp = this->cards[newpos];
@@ -120,6 +119,14 @@ int Board_river(Board *this, Deck *deck)
     return 1;
 }
 
+void Board_fill(Board *this, Deck *deck)
+{
+    for (int i = 0; i < 5; ++i) {
+        this->cards[i] = Deck_next(deck);
+    }
+    this->state = BOARD_RIVER;
+}
+
 void Board_deal_streets(Board *board, Deck *deck)
 {
     if (!Board_flop(board, deck))
@@ -185,6 +192,11 @@ void Game_deal_board(Game *this)
     Board_deal_streets(&this->board, this->deck);
 }
 
+void Game_fill_board(Game *this)
+{
+    Board_fill(&this->board, this->deck);
+}
+
 #define WINNING_PLAYER(a, b) (((a)->eval == (b)->eval) ? NULL : (((a)->eval > (b)->eval) ? (a) : (b)))
 
 void Game_show_winner(Game *this)
@@ -193,7 +205,7 @@ void Game_show_winner(Game *this)
     printf("%10s: %s\n", "Winner", winner ? winner->name : "Chop");
 }
 
-int play_round(void)
+void play_round(void)
 {
     Game *game = Game_new();
 
@@ -213,7 +225,34 @@ int play_round(void)
     Game_destroy(game);
 }
 
+void play_rounds(int rounds)
+{
+    int herocount = 0;
+    int villaincount = 0;
+    int chopcount = 0;
+
+    for (int i = 0; i < rounds; ++i) {
+        Game *game = Game_new();
+        Game_fill_board(game);
+        Player_evaluate(&game->hero, &game->board);
+        Player_evaluate(&game->villain, &game->board);
+
+        Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
+        if (winner == &game->hero)
+            ++herocount;
+        else if (winner == &game->villain)
+            ++villaincount;
+        else
+            ++chopcount;
+
+        Game_destroy(game);
+    }
+
+    printf("Win counts: [Hero: %d] [Villain: %d] [Chops: %d]\n", herocount, villaincount, chopcount);
+}
+
 int main(void)
 {
-    play_round();
+    srand(time(NULL));
+    play_rounds(10000);
 }
