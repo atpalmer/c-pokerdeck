@@ -40,11 +40,11 @@ int Deck_next(Deck *this)
 }
 
 
-/* Hand */
+/* Player */
 
-Hand Hand_deal(const char *name, Deck *deck)
+Player Player_deal(const char *name, Deck *deck)
 {
-    Hand result = {
+    Player result = {
         .name = name,
         .cards = {
             Deck_next(deck),
@@ -55,10 +55,20 @@ Hand Hand_deal(const char *name, Deck *deck)
     return result;
 }
 
-void Hand_show(Hand *hand)
+void Player_show_hand(Player *p)
 {
-    printf("%s:\n", hand->name);
-    printf("\t%s %s\n", CARD_TEXT(hand->cards[0]), CARD_TEXT(hand->cards[1]));
+    printf("%s:\n", p->name);
+    printf("\t%s %s\n", CARD_TEXT(p->cards[0]), CARD_TEXT(p->cards[1]));
+}
+
+void Player_show_eval(Player *p)
+{
+    printf("%10s: %s [", p->name, EVAL_TEXT(p->eval));
+    for (int i = 0; i < 5; ++i) {
+        int rankx = EVAL_GETRANK(p->eval, i);
+        printf("%c", RankSym[rankx]);
+    }
+    printf("]\n");
 }
 
 
@@ -138,30 +148,20 @@ void deal_board(Board *board, Deck *deck)
         CARD_TEXT(board->cards[4]));
 }
 
-void display_eval(const char *name, HandEval eval)
-{
-    printf("%10s: %s [", name, EVAL_TEXT(eval));
-    for (int i = 0; i < 5; ++i) {
-        int rankx = EVAL_GETRANK(eval, i);
-        printf("%c", RankSym[rankx]);
-    }
-    printf("]\n");
-}
-
 int main(void)
 {
     Deck *deck = Deck_new();
     Deck_shuffle(deck);
-    Hand hero = Hand_deal("Hero", deck);
-    Hand villain = Hand_deal("Villain", deck);
+    Player hero = Player_deal("Hero", deck);
+    Player villain = Player_deal("Villain", deck);
     Board board = Board_new();
-    Hand_show(&hero);
-    Hand_show(&villain);
+    Player_show_hand(&hero);
+    Player_show_hand(&villain);
     deal_board(&board, deck);
     hero.eval = evaluate(hero.cards, board.cards);
     villain.eval = evaluate(villain.cards, board.cards);
     printf("Result:\n");
-    display_eval(hero.name, hero.eval);
-    display_eval(villain.name, villain.eval);
+    Player_show_eval(&hero);
+    Player_show_eval(&villain);
     Deck_cleanup(deck);
 }

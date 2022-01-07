@@ -91,6 +91,6 @@ typedef struct {
     const char *name;
     int cards[2];
     HandEval eval;
-} Hand;
+} Player;
 
 #endif
