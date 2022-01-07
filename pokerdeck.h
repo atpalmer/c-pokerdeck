@@ -12,20 +12,24 @@ static const char SuitSym[] = "shdc";
 #define RANKX(c) ((c) % 13)
 #define SUITX(c) ((c) / 13)
 
-#define RANK(c) (RankSym[RANKX(c)])
-#define SUIT(c) (SuitSym[SUITX(c)])
+#define CARD_RANKSYM(c) (RankSym[RANKX(c)])
+#define CARD_SUITSYM(c) (SuitSym[SUITX(c)])
 
 enum {
     RANK_A = 12,
 };
 
 typedef struct {
-    char text[3];  /* '\0'-terminated string */
-} Card;
+    char value[3];  /* '\0'-terminated string */
+} CardString;
 
-Card Card_from_id(int id);
+static inline CardString CardString_from_id(int c)
+{
+    CardString result = {{CARD_RANKSYM(c), CARD_SUITSYM(c), '\0'}};
+    return result;
+}
 
-#define CARD_TEXT(c)    (Card_from_id(c).text)
+#define CARD_TEXT(c)    (CardString_from_id(c).value)
 
 typedef struct {
     int count;

@@ -4,17 +4,6 @@
 #include "pokerdeck.h"
 
 
-/* Card */
-
-Card Card_from_id(int c)
-{
-    Card result = {
-        .text = {RANK(c), SUIT(c), '\0'},
-    };
-    return result;
-}
-
-
 /* Deck */
 
 Deck *Deck_new(void)
