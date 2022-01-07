@@ -120,7 +120,7 @@ int Board_river(Board *this, Deck *deck)
     return 1;
 }
 
-void deal_board(Board *board, Deck *deck)
+void Board_deal_streets(Board *board, Deck *deck)
 {
     if (!Board_flop(board, deck))
         return;
@@ -182,7 +182,7 @@ void Game_destroy(Game *this)
 
 void Game_deal_board(Game *this)
 {
-    deal_board(&this->board, this->deck);
+    Board_deal_streets(&this->board, this->deck);
 }
 
 #define WINNING_PLAYER(a, b) (((a)->eval == (b)->eval) ? NULL : (((a)->eval > (b)->eval) ? (a) : (b)))
