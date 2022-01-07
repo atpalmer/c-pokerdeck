@@ -149,9 +149,9 @@ void deal_board(Board *board, Deck *deck)
         board->cards[4].text);
 }
 
-void display_eval(HandEval eval)
+void display_eval(const char *name, HandEval eval)
 {
-    printf("Result: %s [", EVAL_TEXT(eval));
+    printf("%10s: %s [", name, EVAL_TEXT(eval));
     for (int i = 0; i < 5; ++i) {
         int rankx = EVAL_GETRANK(eval, i);
         printf("%c", RankSym[rankx]);
@@ -164,10 +164,15 @@ int main(void)
     Deck *deck = Deck_new();
     Deck_shuffle(deck);
     Hand hero = Hand_deal("Hero", deck);
+    Hand villain = Hand_deal("Villain", deck);
     Board board = Board_new();
     Hand_show(&hero);
+    Hand_show(&villain);
     deal_board(&board, deck);
-    HandEval eval = evaluate(&hero, &board);
-    display_eval(eval);
+    HandEval heval = evaluate(&hero, &board);
+    HandEval veval = evaluate(&villain, &board);
+    printf("Result:\n");
+    display_eval(hero.name, heval);
+    display_eval(villain.name, veval);
     Deck_cleanup(deck);
 }
