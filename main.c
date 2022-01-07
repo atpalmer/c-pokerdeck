@@ -231,28 +231,53 @@ void play_rounds(int rounds)
     int villaincount = 0;
     int chopcount = 0;
 
+    int cardwins[13][13] = {0};
+    int carddeals[13][13] = {0};
+
     for (int i = 0; i < rounds; ++i) {
         Game *game = Game_new();
         Game_fill_board(game);
         Player_evaluate(&game->hero, &game->board);
         Player_evaluate(&game->villain, &game->board);
 
+        int c1 = RANKX(game->hero.cards[0]) > RANKX(game->hero.cards[1])
+            ? RANKX(game->hero.cards[0])
+            : RANKX(game->hero.cards[1]);
+        int c2 = RANKX(game->hero.cards[0]) <= RANKX(game->hero.cards[1])
+            ? RANKX(game->hero.cards[0])
+            : RANKX(game->hero.cards[1]);
+        ++carddeals[c1][c2];
+
         Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
-        if (winner == &game->hero)
+        if (winner == &game->hero) {
             ++herocount;
-        else if (winner == &game->villain)
+            ++cardwins[c1][c2];
+        } else if (winner == &game->villain) {
             ++villaincount;
-        else
+        } else {
             ++chopcount;
+        }
 
         Game_destroy(game);
     }
 
     printf("Win counts: [Hero: %d] [Villain: %d] [Chops: %d]\n", herocount, villaincount, chopcount);
+    for (int c1 = RANK_A; c1 >= 0; --c1) {
+        for (int c2 = RANK_A; c2 >= 0; --c2) {
+            if (!carddeals[c1][c2])
+                continue;
+            printf("[%c-%c]: %.01f%% (%d / %d)\n",
+                RankSym[c1],
+                RankSym[c2],
+                ((double)cardwins[c1][c2] * 100.0) / (double)carddeals[c1][c2],
+                cardwins[c1][c2],
+                carddeals[c1][c2]);
+        }
+    }
 }
 
 int main(void)
 {
     srand(time(NULL));
-    play_rounds(10000);
+    play_rounds(1000000);
 }
