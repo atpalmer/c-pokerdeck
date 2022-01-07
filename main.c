@@ -193,7 +193,7 @@ void Game_show_winner(Game *this)
     printf("%10s: %s\n", "Winner", winner ? winner->name : "Chop");
 }
 
-int main(void)
+int play_round(void)
 {
     Game *game = Game_new();
 
@@ -211,4 +211,9 @@ int main(void)
     Game_show_winner(game);
 
     Game_destroy(game);
+}
+
+int main(void)
+{
+    play_round();
 }
