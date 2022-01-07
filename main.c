@@ -50,6 +50,7 @@ Hand Hand_deal(const char *name, Deck *deck)
             Deck_next(deck),
             Deck_next(deck),
         },
+        .eval = EVAL_NONE,
     };
     return result;
 }
@@ -157,10 +158,10 @@ int main(void)
     Hand_show(&hero);
     Hand_show(&villain);
     deal_board(&board, deck);
-    HandEval heval = evaluate(hero.cards, board.cards);
-    HandEval veval = evaluate(villain.cards, board.cards);
+    hero.eval = evaluate(hero.cards, board.cards);
+    villain.eval = evaluate(villain.cards, board.cards);
     printf("Result:\n");
-    display_eval(hero.name, heval);
-    display_eval(villain.name, veval);
+    display_eval(hero.name, hero.eval);
+    display_eval(villain.name, villain.eval);
     Deck_cleanup(deck);
 }

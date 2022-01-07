@@ -36,11 +36,6 @@ typedef struct {
     int cards[52];
 } Deck;
 
-typedef struct {
-    const char *name;
-    int cards[2];
-} Hand;
-
 typedef enum {
     BOARD_EMPTY = 0,
     BOARD_FLOP = 1,
@@ -91,5 +86,11 @@ static const char *_EVALX_TEXT[] = {
 #define EVAL_GETRANK(e, pos)    (((e) >> ((4 - (pos)) * 4)) & 0x000000f)
 
 HandEval evaluate(int *handcards, int *boardcards);
+
+typedef struct {
+    const char *name;
+    int cards[2];
+    HandEval eval;
+} Hand;
 
 #endif
