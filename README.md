@@ -6,17 +6,18 @@ Sample output:
 
 ```
 Hero:
-	7s As
+	2s Qc
 Villain:
-	9d Qc
+	7s 2c
 Flop:
-	6h 8s Jc
+	9d 6c 3h
 Turn:
-	6h 8s Jc 3c
+	9d 6c 3h 3s
 River:
-	6h 8s Jc 3c 9c
+	9d 6c 3h 3s Qs
 Result:
-      Hero: High card [AJ987]
-   Villain: Pair [99QJ8]
+      Hero: Two Pair [QQ339]
+   Villain: Pair [33Q97]
+    Winner: Hero
 ```
 
