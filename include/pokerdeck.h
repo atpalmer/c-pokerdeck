@@ -108,7 +108,7 @@ static const char *_EVALX_TEXT[] = {
 #define EVAL_TEXT(e)            (_EVALX_TEXT[EVALX(e)])
 #define EVAL_GETRANK(e, pos)    (((e) >> ((4 - (pos)) * 4)) & 0x000000f)
 
-HandEval evaluate(int *handcards, int *boardcards);
+HandEval HandEval_run(int *handcards, int *boardcards);
 
 
 /*** Player ***/

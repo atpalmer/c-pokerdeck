@@ -226,7 +226,7 @@ static HandEval _high_card(EvalState *state)
     return EVAL_NONE | evalbits;
 }
 
-HandEval evaluate(int *handcards, int *boardcards)
+HandEval HandEval_run(int *handcards, int *boardcards)
 {
     EvalState state = {
         .cards = {

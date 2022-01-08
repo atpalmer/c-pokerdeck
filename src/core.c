@@ -65,7 +65,7 @@ Player Player_deal(const char *name, Deck *deck)
 
 void Player_evaluate(Player *p, Board *b)
 {
-    p->eval = evaluate(p->cards, b->cards);
+    p->eval = HandEval_run(p->cards, b->cards);
 }
 
 
