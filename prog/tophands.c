@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include "pokerdeck.h"
 
@@ -68,19 +67,20 @@ Summary **Summary_create(Stats *stats)
         for (int c2 = RANK_A; c2 >= 0; --c2) {
             Summary *s = malloc(sizeof *s);
 
-            int low, hi, suited;
             if (c1 <= c2) {
-                low = c1;
-                hi = c2;
-                suited = 0;
+                /* offsuit hands are encoded [low][high] */
+                s->sym[0] = RankSym[c2];
+                s->sym[1] = RankSym[c1];
+                s->sym[2] = 'o';
+                s->sym[3] = '\0';
             } else {
-                hi = c1;
-                low = c2;
-                suited = 1;
+                /* suited hands are encoded [high][low] */
+                s->sym[0] = RankSym[c1];
+                s->sym[1] = RankSym[c2];
+                s->sym[2] = 's';
+                s->sym[3] = '\0';
             }
 
-            char sym[] = {RankSym[hi], RankSym[low], suited ? 's' : 'o', '\0'};
-            memcpy(s->sym, sym, ARRAYLEN(sym));
             s->win_pct = (double)stats->cardwins[c1][c2] / (double)stats->carddeals[c1][c2];
 
             result[(13 * c1) + c2] = s;
