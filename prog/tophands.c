@@ -32,6 +32,13 @@ void Stats_update(Stats *stats, Player *p, Player *winner)
         ++stats->cardwins[c1][c2];
 }
 
+void Stats_update_from_Game(Stats *stats, Game *game)
+{
+    Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
+    Stats_update(stats, &game->hero, winner);
+    Stats_update(stats, &game->villain, winner);
+}
+
 typedef struct {
     char sym[4];
     double win_pct;
@@ -98,9 +105,7 @@ void top_hands(int rounds)
 
     for (int i = 0; i < rounds; ++i) {
         Game *game = Game_new_runout();
-        Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
-        Stats_update(&stats, &game->hero, winner);
-        Stats_update(&stats, &game->villain, winner);
+        Stats_update_from_Game(&stats, game);
         Game_destroy(game);
     }
 
