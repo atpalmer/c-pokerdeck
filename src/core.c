@@ -192,6 +192,12 @@ void Game_fill_board(Game *this)
     Board_fill(&this->board, this->deck);
 }
 
+void Game_evaluate_hands(Game *this)
+{
+    Player_evaluate(&this->hero, &this->board);
+    Player_evaluate(&this->villain, &this->board);
+}
+
 void Game_show_winner(Game *this)
 {
     Player *winner = WINNING_PLAYER(&this->hero, &this->villain);

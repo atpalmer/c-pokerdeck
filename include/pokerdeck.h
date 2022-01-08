@@ -140,6 +140,7 @@ Game *Game_new(void);
 void Game_destroy(Game *this);
 void Game_deal_board(Game *this);
 void Game_fill_board(Game *this);
+void Game_evaluate_hands(Game *this);
 void Game_show_winner(Game *this);
 
 #endif

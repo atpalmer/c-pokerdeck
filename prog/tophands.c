@@ -99,8 +99,7 @@ void top_hands(int rounds)
     for (int i = 0; i < rounds; ++i) {
         Game *game = Game_new();
         Game_fill_board(game);
-        Player_evaluate(&game->hero, &game->board);
-        Player_evaluate(&game->villain, &game->board);
+        Game_evaluate_hands(game);
         Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
         Stats_update(&stats, &game->hero, winner);
         Stats_update(&stats, &game->villain, winner);
