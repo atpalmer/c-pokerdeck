@@ -101,15 +101,15 @@ void Summary_destroy(Summary **this)
 
 void top_hands(int rounds)
 {
-    Stats stats = {0};
+    Stats *stats = calloc(sizeof *stats, 1);
 
     for (int i = 0; i < rounds; ++i) {
         Game *game = Game_new_runout();
-        Stats_update_from_Game(&stats, game);
+        Stats_update_from_Game(stats, game);
         Game_destroy(game);
     }
 
-    Summary **summary = Summary_create(&stats);
+    Summary **summary = Summary_create(stats);
 
     printf("Top starting hands for %d simulations:\n", rounds);
     for (int i = 0; i < 13 * 13; ++i) {
@@ -118,6 +118,8 @@ void top_hands(int rounds)
     }
 
     Summary_destroy(summary);
+
+    free(stats);
 }
 
 int main(void)
