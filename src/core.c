@@ -198,6 +198,16 @@ void Game_evaluate_hands(Game *this)
     Player_evaluate(&this->villain, &this->board);
 }
 
+Game *Game_new_runout(void)
+{
+    Game *new = Game_new();
+    if (!new)
+        return NULL;
+    Game_fill_board(new);
+    Game_evaluate_hands(new);
+    return new;
+}
+
 void Game_show_winner(Game *this)
 {
     Player *winner = WINNING_PLAYER(&this->hero, &this->villain);

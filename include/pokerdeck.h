@@ -137,6 +137,7 @@ typedef struct {
 } Game;
 
 Game *Game_new(void);
+Game *Game_new_runout(void);
 void Game_destroy(Game *this);
 void Game_deal_board(Game *this);
 void Game_fill_board(Game *this);
