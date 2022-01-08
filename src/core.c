@@ -210,7 +210,7 @@ Game *Game_new_runout(void)
 
 void Game_show_winner(Game *this)
 {
-    Player *winner = WINNING_PLAYER(&this->hero, &this->villain);
+    Player *winner = GAME_WINNER(this);
     printf("%10s: %s\n", "Winner", winner ? winner->name : "Chop");
 }
 

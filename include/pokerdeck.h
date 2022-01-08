@@ -136,6 +136,8 @@ typedef struct {
     Board board;
 } Game;
 
+#define GAME_WINNER(game)   (WINNING_PLAYER(&(game)->hero, &(game)->villain))
+
 Game *Game_new(void);
 Game *Game_new_runout(void);
 void Game_destroy(Game *this);

@@ -33,7 +33,7 @@ void Stats_update(Stats *stats, Player *p, Player *winner)
 
 void Stats_update_from_Game(Stats *stats, Game *game)
 {
-    Player *winner = WINNING_PLAYER(&game->hero, &game->villain);
+    Player *winner = GAME_WINNER(game);
     Stats_update(stats, &game->hero, winner);
     Stats_update(stats, &game->villain, winner);
 }
