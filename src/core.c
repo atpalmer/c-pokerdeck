@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "pokerdeck.h"
 
@@ -58,22 +57,6 @@ void Player_evaluate(Player *p, Board *b)
     p->eval = evaluate(p->cards, b->cards);
 }
 
-void Player_show_hand(Player *p)
-{
-    printf("%s:\n", p->name);
-    printf("\t%s %s\n", CARD_TEXT(p->cards[0]), CARD_TEXT(p->cards[1]));
-}
-
-void Player_show_eval(Player *p)
-{
-    printf("%10s: %s [", p->name, EVAL_TEXT(p->eval));
-    for (int i = 0; i < 5; ++i) {
-        int rankx = EVAL_GETRANK(p->eval, i);
-        printf("%c", RankSym[rankx]);
-    }
-    printf("]\n");
-}
-
 
 /*** Board ***/
 
@@ -126,39 +109,6 @@ void Board_fill(Board *this, Deck *deck)
     this->state = BOARD_RIVER;
 }
 
-void Board_deal_streets(Board *board, Deck *deck)
-{
-    if (!Board_flop(board, deck))
-        return;
-
-    printf("Flop:\n");
-    printf("\t%s %s %s\n",
-        CARD_TEXT(board->cards[0]),
-        CARD_TEXT(board->cards[1]),
-        CARD_TEXT(board->cards[2]));
-
-    if (!Board_turn(board, deck))
-        return;
-
-    printf("Turn:\n");
-    printf("\t%s %s %s %s\n",
-        CARD_TEXT(board->cards[0]),
-        CARD_TEXT(board->cards[1]),
-        CARD_TEXT(board->cards[2]),
-        CARD_TEXT(board->cards[3]));
-
-    if (!Board_river(board, deck))
-        return;
-
-    printf("River:\n");
-    printf("\t%s %s %s %s %s\n",
-        CARD_TEXT(board->cards[0]),
-        CARD_TEXT(board->cards[1]),
-        CARD_TEXT(board->cards[2]),
-        CARD_TEXT(board->cards[3]),
-        CARD_TEXT(board->cards[4]));
-}
-
 
 /*** Game ***/
 
@@ -182,11 +132,6 @@ void Game_destroy(Game *this)
     free(this);
 }
 
-void Game_deal_board(Game *this)
-{
-    Board_deal_streets(&this->board, this->deck);
-}
-
 void Game_fill_board(Game *this)
 {
     Board_fill(&this->board, this->deck);
@@ -206,11 +151,5 @@ Game *Game_new_runout(void)
     Game_fill_board(new);
     Game_evaluate_hands(new);
     return new;
-}
-
-void Game_show_winner(Game *this)
-{
-    Player *winner = GAME_WINNER(this);
-    printf("%10s: %s\n", "Winner", winner ? winner->name : "Chop");
 }
 

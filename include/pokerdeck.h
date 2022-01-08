@@ -66,7 +66,6 @@ Board Board_new(void);
 int Board_flop(Board *this, Deck *deck);
 int Board_turn(Board *this, Deck *deck);
 int Board_river(Board *this, Deck *deck);
-void Board_deal_streets(Board *board, Deck *deck);
 
 
 /*** Hand Evaluation ***/
@@ -121,8 +120,6 @@ typedef struct {
 
 Player Player_deal(const char *name, Deck *deck);
 void Player_evaluate(Player *p, Board *b);
-void Player_show_hand(Player *p);
-void Player_show_eval(Player *p);
 
 #define WINNING_PLAYER(a, b) (((a)->eval == (b)->eval) ? NULL : (((a)->eval > (b)->eval) ? (a) : (b)))
 
@@ -141,9 +138,7 @@ typedef struct {
 Game *Game_new(void);
 Game *Game_new_runout(void);
 void Game_destroy(Game *this);
-void Game_deal_board(Game *this);
 void Game_fill_board(Game *this);
 void Game_evaluate_hands(Game *this);
-void Game_show_winner(Game *this);
 
 #endif
