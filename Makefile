@@ -1,6 +1,6 @@
 BIN=./bin
 SOURCES=src/*.c
-CFLAGS=-I./include
+CFLAGS=-I./include -O3 -Wall -Wextra -Wpedantic
 
 all: tophands playround
 
