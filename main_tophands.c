@@ -4,43 +4,24 @@
 #include <time.h>
 #include "pokerdeck.h"
 
-
-void play_round(void)
-{
-    Game *game = Game_new();
-
-    Player_show_hand(&game->hero);
-    Player_show_hand(&game->villain);
-
-    Game_deal_board(game);
-    Player_evaluate(&game->hero, &game->board);
-    Player_evaluate(&game->villain, &game->board);
-
-    printf("Result:\n");
-    Player_show_eval(&game->hero);
-    Player_show_eval(&game->villain);
-
-    Game_show_winner(game);
-
-    Game_destroy(game);
-}
+#define HIGHCARD(cards) (RANKX((cards)[0]) > RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
+#define LOWCARD(cards) (RANKX((cards)[0]) <= RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
 
 typedef struct {
     int cardwins[13][13];
     int carddeals[13][13];
 } Stats;
 
-#define HIGHCARD(cards) (RANKX((cards)[0]) > RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
-#define LOWCARD(cards) (RANKX((cards)[0]) <= RANKX((cards)[1]) ? RANKX((cards)[0]) : RANKX((cards)[1]))
-
 void Stats_update(Stats *stats, Player *p, Player *winner)
 {
     int c1, c2;
 
     if (SUITX(p->cards[0]) == SUITX(p->cards[1])) {
+        /* encode suited hands as [high][low] */
         c1 = HIGHCARD(p->cards);
         c2 = LOWCARD(p->cards);
     } else {
+        /* encode offsuit hands as [low][high] */
         c1 = LOWCARD(p->cards);
         c2 = HIGHCARD(p->cards);
     }
