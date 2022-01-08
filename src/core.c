@@ -7,6 +7,8 @@
 Deck *Deck_new_ordered(void)
 {
     Deck *new = malloc(sizeof *new);
+    if (!new)
+        return NULL;
     for (int i = 0; i < 52; ++i) {
         new->cards[i] = i;
     }
@@ -32,6 +34,8 @@ void Deck_shuffle(Deck *this)
 Deck *Deck_new_shuffled(void)
 {
     Deck *new = Deck_new_ordered();
+    if (!new)
+        return NULL;
     Deck_shuffle(new);
     return new;
 }
@@ -122,6 +126,8 @@ void Board_fill(Board *this, Deck *deck)
 Game *Game_new(void)
 {
     Game *new = malloc(sizeof *new);
+    if (!new)
+        return NULL;
     new->deck = Deck_new_shuffled();
     new->hero = Player_deal("Hero", new->deck);
     new->villain = Player_deal("Villain", new->deck);
