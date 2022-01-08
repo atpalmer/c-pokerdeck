@@ -4,7 +4,7 @@
 
 /*** Deck ***/
 
-Deck *Deck_new(void)
+Deck *Deck_new_ordered(void)
 {
     Deck *new = malloc(sizeof *new);
     for (int i = 0; i < 52; ++i) {
@@ -14,7 +14,7 @@ Deck *Deck_new(void)
     return new;
 }
 
-void Deck_cleanup(Deck *this)
+void Deck_destroy(Deck *this)
 {
     free(this);
 }
@@ -27,6 +27,13 @@ void Deck_shuffle(Deck *this)
         this->cards[newpos] = this->cards[i];
         this->cards[i] = tmp;
     }
+}
+
+Deck *Deck_new_shuffled(void)
+{
+    Deck *new = Deck_new_ordered();
+    Deck_shuffle(new);
+    return new;
 }
 
 int Deck_next(Deck *this)
@@ -115,20 +122,16 @@ void Board_fill(Board *this, Deck *deck)
 Game *Game_new(void)
 {
     Game *new = malloc(sizeof *new);
-
-    new->deck = Deck_new();
-    Deck_shuffle(new->deck);
-
+    new->deck = Deck_new_shuffled();
     new->hero = Player_deal("Hero", new->deck);
     new->villain = Player_deal("Villain", new->deck);
     new->board = Board_new();
-
     return new;
 }
 
 void Game_destroy(Game *this)
 {
-    Deck_cleanup(this->deck);
+    Deck_destroy(this->deck);
     free(this);
 }
 

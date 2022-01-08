@@ -42,8 +42,9 @@ typedef struct {
     int cards[52];
 } Deck;
 
-Deck *Deck_new(void);
-void Deck_cleanup(Deck *this);
+Deck *Deck_new_ordered(void);
+Deck *Deck_new_shuffled(void);
+void Deck_destroy(Deck *this);
 void Deck_shuffle(Deck *this);
 int Deck_next(Deck *this);
 
