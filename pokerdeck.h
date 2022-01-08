@@ -6,6 +6,9 @@
 #define ARRAYLEN(x)         ((ssize_t)(sizeof (x)  / sizeof *(x)))
 #define HAS_FLAG(x, flag)   (((x) & (flag)) == (flag))
 
+
+/*** Cards ***/
+
 static const char RankSym[] = "23456789TJQKA";
 static const char SuitSym[] = "shdc";
 
@@ -31,10 +34,21 @@ static inline CardString CardString_from_id(int c)
 
 #define CARD_TEXT(c)    (CardString_from_id(c).value)
 
+
+/*** Deck ***/
+
 typedef struct {
     int count;
     int cards[52];
 } Deck;
+
+Deck *Deck_new(void);
+void Deck_cleanup(Deck *this);
+void Deck_shuffle(Deck *this);
+int Deck_next(Deck *this);
+
+
+/*** Board ***/
 
 typedef enum {
     BOARD_EMPTY = 0,
@@ -47,6 +61,15 @@ typedef struct {
     BoardState state;
     int cards[5];
 } Board;
+
+Board Board_new(void);
+int Board_flop(Board *this, Deck *deck);
+int Board_turn(Board *this, Deck *deck);
+int Board_river(Board *this, Deck *deck);
+void Board_deal_streets(Board *board, Deck *deck);
+
+
+/*** Hand Evaluation ***/
 
 /*
  * Hand evaluation format encodes leading hand qualification,
@@ -87,10 +110,36 @@ static const char *_EVALX_TEXT[] = {
 
 HandEval evaluate(int *handcards, int *boardcards);
 
+
+/*** Player ***/
+
 typedef struct {
     const char *name;
     int cards[2];
     HandEval eval;
 } Player;
+
+Player Player_deal(const char *name, Deck *deck);
+void Player_evaluate(Player *p, Board *b);
+void Player_show_hand(Player *p);
+void Player_show_eval(Player *p);
+
+#define WINNING_PLAYER(a, b) (((a)->eval == (b)->eval) ? NULL : (((a)->eval > (b)->eval) ? (a) : (b)))
+
+
+/*** Game ***/
+
+typedef struct {
+    Deck *deck;
+    Player hero;
+    Player villain;
+    Board board;
+} Game;
+
+Game *Game_new(void);
+void Game_destroy(Game *this);
+void Game_deal_board(Game *this);
+void Game_fill_board(Game *this);
+void Game_show_winner(Game *this);
 
 #endif

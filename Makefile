@@ -1,4 +1,4 @@
-OBJECTS=main.o handeval.o
+OBJECTS=main.o core.o handeval.o
 P=a.out
 
 $P: $(OBJECTS)
