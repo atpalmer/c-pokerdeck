@@ -1,15 +1,12 @@
 BIN=./bin
-OBJECTS=core.o handeval.o
-ALLO=main_tophands.o main_playround.o
-ALL=tophands playround
+SOURCES=src/*.c
+CFLAGS=-I./include
 
-all: $(ALL)
+all: tophands playround
 
-tophands: $(OBJECTS) main_tophands.o
-	$(CC) -o $(BIN)/tophands $(OBJECTS) main_tophands.o
-
-playround: $(OBJECTS) main_playround.o
-	$(CC) -o $(BIN)/playround $(OBJECTS) main_playround.o
+%: $(SOURCES) prog/%.c
+	mkdir -p $(BIN)
+	$(CC) $(CFLAGS) -o $(BIN)/$@ $?
 
 clean:
-	rm $(OBJECTS) $(ALLO)
+	rm -r $(BIN)
