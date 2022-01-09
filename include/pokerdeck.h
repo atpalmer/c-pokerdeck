@@ -105,6 +105,7 @@ static const char *_EVALX_TEXT[] = {
     [EVALX(EVAL_ROYAL)]    = "Royal Flush",
 };
 
+#define EVALX_TEXT(x)           (_EVALX_TEXT[(x)])
 #define EVAL_TEXT(e)            (_EVALX_TEXT[EVALX(e)])
 #define EVAL_GETRANK(e, pos)    (((e) >> ((4 - (pos)) * 4)) & 0x000000f)
 

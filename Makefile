@@ -2,7 +2,7 @@ BIN=./bin
 SOURCES=src/*.c
 CFLAGS=-I./include -O3 -Wall -Wextra -Wpedantic
 
-all: tophands playround
+all: tophands playround showdown
 
 %: $(SOURCES) prog/%.c
 	mkdir -p $(BIN)
