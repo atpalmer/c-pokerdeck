@@ -71,7 +71,7 @@ Summary **Summary_create(Stats *stats)
                 /* offsuit hands are encoded [low][high] */
                 s->sym[0] = RankSym[c2];
                 s->sym[1] = RankSym[c1];
-                s->sym[2] = 'o';
+                s->sym[2] = (c1 == c2) ? ' ' : 'o';
                 s->sym[3] = '\0';
             } else {
                 /* suited hands are encoded [high][low] */
@@ -114,7 +114,7 @@ void top_hands(int rounds)
     printf("Top starting hands for %d simulations:\n", rounds);
     for (int i = 0; i < 13 * 13; ++i) {
         Summary *s = summary[i];
-        printf("%d) [%s]: %.01f%%\n", i + 1, s->sym, s->win_pct * 100);
+        printf("%3d) [%s]: %.01f%%\n", i + 1, s->sym, s->win_pct * 100);
     }
 
     Summary_destroy(summary);
